@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import random
 import string
 import datetime
+import time
 
 # Dictionary for multilingual text
 texts = {
@@ -207,11 +208,11 @@ texts = {
         "uk": "Призначення:",
         "ru": "Назначение:"
     },
-    "map_link": {
-        "en": "[Link to the map of the premises](http://example.com/map)",
-        "ro": "[Link către harta sediului](http://example.com/map)",
-        "uk": "[Посилання на карту приміщень](http://example.com/map)",
-        "ru": "[Ссылка на карту помещения](http://example.com/map)"
+    "thank_you": {
+        "en": "Thank you! Have a splendid time at the Hub!",
+        "ro": "Mulțumim! Să aveți un timp splendid la Hub!",
+        "uk": "Дякуємо! Бажаємо вам чудового часу в Хабі!",
+        "ru": "Спасибо! Желаем вам замечательного времени в Хабе!"
     }
 }
 
@@ -248,9 +249,21 @@ service_descriptions = {
     "Assistance Office": "Office for providing specialized assistance."
 }
 
+# Define session state for inactivity
+if 'last_interaction' not in st.session_state:
+    st.session_state['last_interaction'] = time.time()
+
 def main():
     st.set_page_config(page_title="Moldova for Peace Entry-Stand", layout="centered")
     
+    # Reset session state if inactive for 30 seconds
+    if time.time() - st.session_state['last_interaction'] > 30:
+        st.session_state.clear()
+        st.session_state['last_interaction'] = time.time()
+
+    # Update last interaction time
+    st.session_state['last_interaction'] = time.time()
+
     # Language selection page
     st.title("Moldova for Peace Hub Entry-Stand")
     st.markdown(f"<b>{texts['select_language']['en']}</b>", unsafe_allow_html=True)
@@ -294,15 +307,19 @@ def main():
     col1, col2 = st.columns(2)
     if col1.button(texts["generate_print_ticket"][lang_code]):
         ticket = generate_ticket(visitor_type, visit_purposes, lang_code)
-        st.write(ticket)
+        st.markdown(f"<h2>{ticket['ticket_id']}</h2>", unsafe_allow_html=True)
+        st.write(ticket['details'])
+        st.write(texts["thank_you"][lang_code])
         # Display map and destination
-        display_map(ticket["destination"])
+        display_map([ticket["destination"]])
 
     if col2.button(texts["generate_digital_ticket"][lang_code]):
         ticket = generate_ticket(visitor_type, visit_purposes, lang_code)
-        st.write(ticket)
+        st.markdown(f"<h2>{ticket['ticket_id']}</h2>", unsafe_allow_html=True)
+        st.write(ticket['details'])
+        st.write(texts["thank_you"][lang_code])
         # Display map and destination
-        display_map(ticket["destination"])
+        display_map([ticket["destination"]])
         # Logic to send ticket to Dopamoha (not implemented in this example)
 
 def handle_individual_workflow(lang_code):
@@ -369,17 +386,16 @@ def generate_ticket(visitor_type, visit_purposes, lang_code):
     ticket_id = generate_ticket_id(visitor_type[0].upper())
     destination = random.choice(visit_purposes) if visit_purposes else "Reception"  # Select one of the purposes as destination
     destination_location = purpose_to_location[destination]
-    ticket_details = {
-        "ticket_id": ticket_id,
-        "visitor_type": visitor_type,
-        "destination": destination_location
-    }
-    return (
-        f"{texts['ticket'][lang_code]}\n\n"
-        f"{texts['visitor_type_label'][lang_code]} {ticket_details['visitor_type']}\n"
-        f"{texts['visit_type_label'][lang_code]} {ticket_details['ticket_id']}\n"
-        f"{texts['destination_label'][lang_code]} {ticket_details['destination']}"
+    ticket_details = (
+        f"{texts['visitor_type_label'][lang_code]} {visitor_type}\n"
+        f"{texts['visit_type_label'][lang_code]} {ticket_id}\n"
+        f"{texts['destination_label'][lang_code]} {destination_location}"
     )
+    return {
+        "ticket_id": ticket_id,
+        "destination": destination_location,
+        "details": ticket_details
+    }
 
 def generate_ticket_id(prefix):
     random_digits = ''.join(random.choices(string.digits, k=3))
