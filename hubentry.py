@@ -8,11 +8,8 @@ texts = {
         "uk": "Ласкаво просимо до стенду входу Молдова за мир",
         "ru": "Добро пожаловать на стенд входа Молдова за мир"
     },
-    "continue": {
-        "en": "Please select your language to continue:",
-        "ro": "Vă rugăm să selectați limba pentru a continua:",
-        "uk": "Будь ласка, виберіть мову для продовження:",
-        "ru": "Пожалуйста, выберите язык для продолжения:"
+    "select_language": {
+        "multi": "Please select your language to continue:\nSelectați limba pentru a continua:\nВиберіть мову для продовження:\nВыберите язык для продолжения:"
     },
     "visitor_type": {
         "en": "Are you an individual or representing an organization?",
@@ -92,6 +89,18 @@ texts = {
         "uk": "Згенерувати квиток",
         "ru": "Создать билет"
     },
+    "generate_digital_ticket": {
+        "en": "Generate Digital Ticket",
+        "ro": "Generați Bilet Digital",
+        "uk": "Згенерувати цифровий квиток",
+        "ru": "Создать цифровой билет"
+    },
+    "generate_print_ticket": {
+        "en": "Generate and Print Ticket",
+        "ro": "Generați și Imprimați Bilet",
+        "uk": "Згенерувати і роздрукувати квиток",
+        "ru": "Создать и распечатать билет"
+    },
     "ticket": {
         "en": "Ticket",
         "ro": "Bilet",
@@ -124,12 +133,24 @@ texts = {
     }
 }
 
+# Define service locations on the map
+service_locations = {
+    "Assistance Desk": (50, 50),
+    "Reception": (10, 10),
+    "Event Hall": (30, 30),
+    "Workshop Room": (70, 70),
+    "Service Office": (90, 90),
+    "Service Desk": (80, 80),
+    "Assistance Office": (60, 60)
+}
+
 def main():
-    st.set_page_config(page_title="Moldova for Peace Entry-Stand", layout="wide")
+    st.set_page_config(page_title="Moldova for Peace Entry-Stand", layout="centered")
+    
     # Language selection page
     st.title("Moldova for Peace Hub Entry-Stand")
     language = st.selectbox(
-        texts["continue"]["en"],
+        texts["select_language"]["multi"],
         ["English", "Română", "Українська", "Русский"]
     )
     lang_code = get_language_code(language)
@@ -166,14 +187,25 @@ def main():
             ]
         )
 
-    # Display ticket details
-    if st.button(texts["generate_ticket"][lang_code]):
+    # Display recommended service location and map
+    destination = get_destination(visit_type, lang_code)
+    st.write(f"{texts['destination_label'][lang_code]} {destination}")
+    display_map(destination)
+
+    # Options to generate and print ticket or generate digital ticket
+    col1, col2 = st.columns(2)
+    if col1.button(texts["generate_print_ticket"][lang_code]):
         ticket = generate_ticket(visitor_type, visit_type, lang_code)
         st.write(ticket)
         st.markdown(texts["map_link"][lang_code])
 
+    if col2.button(texts["generate_digital_ticket"][lang_code]):
+        ticket = generate_ticket(visitor_type, visit_type, lang_code)
+        st.write(ticket)
+        st.markdown(texts["map_link"][lang_code])
+        # Logic to send ticket to Dopamoha (not implemented in this example)
+
 def generate_ticket(visitor_type, visit_type, lang_code):
-    # This is a placeholder for the actual ticket generation logic.
     ticket_details = {
         "visitor_type": visitor_type,
         "visit_type": visit_type,
@@ -187,7 +219,6 @@ def generate_ticket(visitor_type, visit_type, lang_code):
     )
 
 def get_destination(visit_type, lang_code):
-    # Mapping visit types to destinations
     destinations = {
         texts["receive_assistance"][lang_code]: "Assistance Desk",
         texts["just_visit"][lang_code]: "Reception",
@@ -198,6 +229,16 @@ def get_destination(visit_type, lang_code):
         texts["provide_assistance"][lang_code]: "Assistance Office",
     }
     return destinations.get(visit_type, "General Area")
+
+def display_map(destination):
+    import matplotlib.pyplot as plt
+
+    fig, ax = plt.subplots()
+    ax.set_xlim(0, 100)
+    ax.set_ylim(0, 100)
+    ax.plot(*service_locations[destination], 'ro')  # Mark the destination with a red dot
+    ax.text(*service_locations[destination], destination, fontsize=12, ha='right')
+    st.pyplot(fig)
 
 def get_language_code(language):
     language_codes = {
