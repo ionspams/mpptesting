@@ -296,13 +296,13 @@ def main():
         ticket = generate_ticket(visitor_type, visit_purposes, lang_code)
         st.write(ticket)
         # Display map and destination
-        display_map([ticket["destination"]])
+        display_map(ticket["destination"])
 
     if col2.button(texts["generate_digital_ticket"][lang_code]):
         ticket = generate_ticket(visitor_type, visit_purposes, lang_code)
         st.write(ticket)
         # Display map and destination
-        display_map([ticket["destination"]])
+        display_map(ticket["destination"])
         # Logic to send ticket to Dopamoha (not implemented in this example)
 
 def handle_individual_workflow(lang_code):
