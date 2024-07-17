@@ -284,6 +284,17 @@ def handle_individual_workflow(lang_code):
     else:
         visitor_name = st.text_input(texts["provide_name"][lang_code])
         num_visitors = st.number_input(texts["number_of_visitors"][lang_code], min_value=1, max_value=10)
+    
+    # Select visit purpose(s)
+    visit_purposes = st.multiselect(
+        texts["visit_purpose"][lang_code],
+        [
+            texts["receive_assistance"][lang_code],
+            texts["just_visit"][lang_code],
+            texts["attend_event"][lang_code],
+            texts["attend_workshop"][lang_code]
+        ]
+    )
 
 def handle_organization_workflow(lang_code):
     org_name = st.selectbox(
@@ -303,6 +314,17 @@ def handle_organization_workflow(lang_code):
         index=-1
     )
     contact_name = st.text_input(texts["provide_name"][lang_code])
+
+    # Select visit purpose(s)
+    visit_purposes = st.multiselect(
+        texts["visit_purpose"][lang_code],
+        [
+            texts["offer_regular_service"][lang_code],
+            texts["offer_single_service"][lang_code],
+            texts["provide_assistance"][lang_code],
+            texts["just_visit"][lang_code]
+        ]
+    )
 
 def generate_ticket(visitor_type, lang_code):
     ticket_details = {
