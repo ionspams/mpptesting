@@ -8,10 +8,10 @@ import time
 # Dictionary for multilingual text
 texts = {
     "welcome": {
-        "en": "Welcome to the Moldova for Peace Hub Entry-Stand",
-        "ro": "Bun venit la Standul de Intrare Moldova pentru Pace",
-        "uk": "Ласкаво просимо до стенду входу Молдова за мир",
-        "ru": "Добро пожаловать на стенд входа Молдова за мир"
+        "en": "Welcome to the Moldova for Peace Hub",
+        "ro": "Bun venit la Moldova pentru Pace",
+        "uk": "Ласкаво просимо до Молдова за мир",
+        "ru": "Добро пожаловать y Молдова за мир"
     },
     "select_language": {
         "en": "Please select your language to continue:",
@@ -35,10 +35,10 @@ texts = {
         "ru": "Организация"
     },
     "do_you_have_account": {
-        "en": "Do you or your family members have an account with Dopamoha?",
-        "ro": "Aveți dvs. sau membrii familiei dvs. un cont pe Dopamoha?",
-        "uk": "Чи є у вас або членів вашої родини обліковий запис на Dopamoha?",
-        "ru": "Есть ли у вас или членов вашей семьи учетная запись на Dopamoha?"
+        "en": "Do you or your family members have an account with Dopomoha?",
+        "ro": "Aveți dvs. sau membrii familiei dvs. un cont pe Dopomoha?",
+        "uk": "Чи є у вас або членів вашої родини обліковий запис на Dopomoha?",
+        "ru": "Есть ли у вас или членов вашей семьи учетная запись на Dopomoha?"
     },
     "yes": {
         "en": "Yes",
@@ -316,7 +316,7 @@ def main():
             st.markdown(f"<h1 style='font-size:72px;'>{ticket['ticket_id']}</h1>", unsafe_allow_html=True)
             st.markdown(f"<h2>{ticket['details']}</h2>", unsafe_allow_html=True)
             st.markdown(f"<h2>{texts['thank_you'][lang_code]}</h2>", unsafe_allow_html=True)
-            # Logic to send ticket to Dopamoha (not implemented in this example)
+            # Logic to send ticket to Dopomoha (not implemented in this example)
 
 def handle_individual_workflow(lang_code):
     st.subheader(texts["do_you_have_account"][lang_code])
