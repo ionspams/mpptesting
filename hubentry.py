@@ -267,25 +267,29 @@ def main():
     )
 
     if visitor_type == texts["individual"][lang_code]:
-        handle_individual_workflow(lang_code)
+        visit_purposes = handle_individual_workflow(lang_code)
     else:
-        handle_organization_workflow(lang_code)
+        visit_purposes = handle_organization_workflow(lang_code)
+
+    # Display map and short description as soon as a purpose is selected
+    if visit_purposes:
+        for purpose in visit_purposes:
+            st.write(f"**{purpose}**: {service_descriptions[purpose]}")
+        display_map(visit_purposes)
 
     # Options to generate and print ticket or generate digital ticket
     col1, col2 = st.columns(2)
     if col1.button(texts["generate_print_ticket"][lang_code]):
-        ticket = generate_ticket(visitor_type, lang_code)
+        ticket = generate_ticket(visitor_type, visit_purposes, lang_code)
         st.write(ticket)
         # Display map and destination
-        display_map(ticket["destination"])
-        st.write(service_descriptions[ticket["destination"]])
+        display_map([ticket["destination"]])
 
     if col2.button(texts["generate_digital_ticket"][lang_code]):
-        ticket = generate_ticket(visitor_type, lang_code)
+        ticket = generate_ticket(visitor_type, visit_purposes, lang_code)
         st.write(ticket)
         # Display map and destination
-        display_map(ticket["destination"])
-        st.write(service_descriptions[ticket["destination"]])
+        display_map([ticket["destination"]])
         # Logic to send ticket to Dopamoha (not implemented in this example)
 
 def handle_individual_workflow(lang_code):
@@ -313,6 +317,7 @@ def handle_individual_workflow(lang_code):
             texts["attend_workshop"][lang_code]
         ]
     )
+    return visit_purposes
 
 def handle_organization_workflow(lang_code):
     org_name = st.selectbox(
@@ -344,11 +349,12 @@ def handle_organization_workflow(lang_code):
             texts["just_visit"][lang_code]
         ]
     )
+    return visit_purposes
 
-def generate_ticket(visitor_type, lang_code):
+def generate_ticket(visitor_type, visit_purposes, lang_code):
     # Generate ticket ID
     ticket_id = generate_ticket_id(visitor_type[0].upper())
-    destination = random.choice(list(service_locations.keys()))  # Random destination for demo purposes
+    destination = random.choice(visit_purposes) if visit_purposes else "Reception"  # Select one of the purposes as destination
     ticket_details = {
         "ticket_id": ticket_id,
         "visitor_type": visitor_type,
@@ -362,7 +368,6 @@ def generate_ticket(visitor_type, lang_code):
     )
 
 def generate_ticket_id(prefix):
-    now = datetime.datetime.now()
     random_digits = ''.join(random.choices(string.digits, k=3))
     ticket_id = f"{prefix}{random_digits}"
     return ticket_id
@@ -376,13 +381,15 @@ def get_language_code(language):
     }
     return language_codes.get(language, "en")
 
-def display_map(destination):
+def display_map(destinations):
     fig, ax = plt.subplots()
     ax.set_xlim(0, 100)
     ax.set_ylim(0, 100)
-    ax.plot(*service_locations[destination], 'ro')  # Mark the destination with a red dot
-    ax.text(*service_locations[destination], destination, fontsize=12, ha='right')
     ax.set_title('Service Locations')
+    for destination in destinations:
+        if destination in service_locations:
+            ax.plot(*service_locations[destination], 'ro')  # Mark the destination with a red dot
+            ax.text(*service_locations[destination], destination, fontsize=12, ha='right')
     st.pyplot(fig)
 
 if __name__ == "__main__":
