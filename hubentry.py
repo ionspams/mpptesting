@@ -230,31 +230,26 @@ def main():
     st.title("Moldova for Peace Hub Entry-Stand")
     st.markdown(f"<b>{texts['select_language']['en']}</b>", unsafe_allow_html=True)
     
-    # Language selection as horizontal multiple choice options
-    cols = st.columns(4)
-    languages = ["English", "Română", "Українська", "Русский"]
-    selected_lang = cols[0].radio("", [languages[0]], key="lang0")
-    selected_lang = cols[1].radio("", [languages[1]], key="lang1")
-    selected_lang = cols[2].radio("", [languages[2]], key="lang2")
-    selected_lang = cols[3].radio("", [languages[3]], key="lang3")
-
-    lang_code = get_language_code(selected_lang)
+    # Language selection as a single radio button group
+    language = st.radio(
+        "",
+        ["English", "Română", "Українська", "Русский"],
+        horizontal=True,
+        index=0
+    )
+    
+    lang_code = get_language_code(language)
     st.session_state['lang_code'] = lang_code
 
     # Display welcome message
     st.header(texts["welcome"][lang_code])
 
     # Select visitor type
-    cols = st.columns(2)
-    visitor_type = cols[0].radio(
+    visitor_type = st.radio(
         texts["visitor_type"][lang_code],
         [texts["individual"][lang_code], texts["organization"][lang_code]],
-        index=0, key="visitor_type0"
-    )
-    visitor_type = cols[1].radio(
-        "",
-        [texts["organization"][lang_code], texts["individual"][lang_code]],
-        index=1, key="visitor_type1"
+        horizontal=True,
+        index=0
     )
 
     if visitor_type == texts["individual"][lang_code]:
@@ -293,7 +288,8 @@ def handle_individual_workflow(lang_code):
 def handle_organization_workflow(lang_code):
     org_name = st.selectbox(
         texts["select_organization"][lang_code],
-        ["Org1", "Org2", "Org3", "Org4", "Org5"]
+        ["Org1", "Org2", "Org3", "Org4", "Org5"],
+        index=-1
     )
     position = st.selectbox(
         texts["select_position"][lang_code],
@@ -303,7 +299,8 @@ def handle_organization_workflow(lang_code):
             texts["monitoring_officer"][lang_code],
             texts["audit_officer"][lang_code],
             texts["data_enumerator"][lang_code]
-        ]
+        ],
+        index=-1
     )
     contact_name = st.text_input(texts["provide_name"][lang_code])
 
