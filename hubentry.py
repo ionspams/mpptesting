@@ -226,6 +226,17 @@ service_locations = {
     "Assistance Office": (60, 60)
 }
 
+# Mapping visit purposes to service locations
+purpose_to_location = {
+    "Receive Assistance": "Assistance Desk",
+    "Just Visit": "Reception",
+    "Attend an Event": "Event Hall",
+    "Attend a Workshop or Focus Group": "Workshop Room",
+    "Offer a Regular Service": "Service Office",
+    "Offer a Single Occurrence Service": "Service Desk",
+    "Provide Assistance": "Assistance Office"
+}
+
 # Short descriptions for each type of service
 service_descriptions = {
     "Assistance Desk": "Provides general assistance and guidance for various needs.",
@@ -273,9 +284,11 @@ def main():
 
     # Display map and short description as soon as a purpose is selected
     if visit_purposes:
+        destinations = [purpose_to_location[purpose] for purpose in visit_purposes]
         for purpose in visit_purposes:
-            st.write(f"**{purpose}**: {service_descriptions[purpose]}")
-        display_map(visit_purposes)
+            destination = purpose_to_location[purpose]
+            st.write(f"**{destination}**: {service_descriptions[destination]}")
+        display_map(destinations)
 
     # Options to generate and print ticket or generate digital ticket
     col1, col2 = st.columns(2)
@@ -355,10 +368,11 @@ def generate_ticket(visitor_type, visit_purposes, lang_code):
     # Generate ticket ID
     ticket_id = generate_ticket_id(visitor_type[0].upper())
     destination = random.choice(visit_purposes) if visit_purposes else "Reception"  # Select one of the purposes as destination
+    destination_location = purpose_to_location[destination]
     ticket_details = {
         "ticket_id": ticket_id,
         "visitor_type": visitor_type,
-        "destination": destination
+        "destination": destination_location
     }
     return (
         f"{texts['ticket'][lang_code]}\n\n"
