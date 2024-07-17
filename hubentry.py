@@ -303,24 +303,20 @@ def main():
             st.write(f"**{destination}**: {service_descriptions[destination]}")
         display_map(destinations)
 
-    # Options to generate and print ticket or generate digital ticket
-    col1, col2 = st.columns(2)
-    if col1.button(texts["generate_print_ticket"][lang_code]):
-        ticket = generate_ticket(visitor_type, visit_purposes, lang_code)
-        st.markdown(f"<h1 style='font-size:72px;'>{ticket['ticket_id']}</h1>", unsafe_allow_html=True)
-        st.markdown(f"<h2>{ticket['details']}</h2>", unsafe_allow_html=True)
-        st.markdown(f"<h2>{texts['thank_you'][lang_code]}</h2>", unsafe_allow_html=True)
-        # Display map and destination
-        display_map([ticket["destination"]])
+        # Options to generate and print ticket or generate digital ticket
+        col1, col2 = st.columns(2)
+        if col1.button(texts["generate_print_ticket"][lang_code]):
+            ticket = generate_ticket(visitor_type, visit_purposes, lang_code)
+            st.markdown(f"<h1 style='font-size:72px;'>{ticket['ticket_id']}</h1>", unsafe_allow_html=True)
+            st.markdown(f"<h2>{ticket['details']}</h2>", unsafe_allow_html=True)
+            st.markdown(f"<h2>{texts['thank_you'][lang_code]}</h2>", unsafe_allow_html=True)
 
-    if col2.button(texts["generate_digital_ticket"][lang_code]):
-        ticket = generate_ticket(visitor_type, visit_purposes, lang_code)
-        st.markdown(f"<h1 style='font-size:72px;'>{ticket['ticket_id']}</h1>", unsafe_allow_html=True)
-        st.markdown(f"<h2>{ticket['details']}</h2>", unsafe_allow_html=True)
-        st.markdown(f"<h2>{texts['thank_you'][lang_code]}</h2>", unsafe_allow_html=True)
-        # Display map and destination
-        display_map([ticket["destination"]])
-        # Logic to send ticket to Dopamoha (not implemented in this example)
+        if col2.button(texts["generate_digital_ticket"][lang_code]):
+            ticket = generate_ticket(visitor_type, visit_purposes, lang_code)
+            st.markdown(f"<h1 style='font-size:72px;'>{ticket['ticket_id']}</h1>", unsafe_allow_html=True)
+            st.markdown(f"<h2>{ticket['details']}</h2>", unsafe_allow_html=True)
+            st.markdown(f"<h2>{texts['thank_you'][lang_code]}</h2>", unsafe_allow_html=True)
+            # Logic to send ticket to Dopamoha (not implemented in this example)
 
 def handle_individual_workflow(lang_code):
     st.subheader(texts["do_you_have_account"][lang_code])
