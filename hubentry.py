@@ -30,17 +30,95 @@ texts = {
         "uk": "Організація",
         "ru": "Организация"
     },
-    "visit_type_individual": {
-        "en": "Please select your purpose of visit:",
-        "ro": "Vă rugăm să selectați scopul vizitei:",
-        "uk": "Будь ласка, виберіть мету візиту:",
-        "ru": "Пожалуйста, выберите цель визита:"
+    "do_you_have_account": {
+        "en": "Do you or your family members have an account with Dopamoha?",
+        "ro": "Aveți dvs. sau membrii familiei dvs. un cont pe Dopamoha?",
+        "uk": "Чи є у вас або членів вашої родини обліковий запис на Dopamoha?",
+        "ru": "Есть ли у вас или членов вашей семьи учетная запись на Dopamoha?"
     },
-    "visit_type_organization": {
-        "en": "Please select your purpose of visit:",
-        "ro": "Vă rugăm să selectați scopul vizitei:",
-        "uk": "Будь ласка, виберіть мету візиту:",
-        "ru": "Пожалуйста, выберите цель визита:"
+    "yes": {
+        "en": "Yes",
+        "ro": "Da",
+        "uk": "Так",
+        "ru": "Да"
+    },
+    "no": {
+        "en": "No",
+        "ro": "Nu",
+        "uk": "Ні",
+        "ru": "Нет"
+    },
+    "phone_number": {
+        "en": "Enter your phone number:",
+        "ro": "Introduceți numărul dvs. de telefon:",
+        "uk": "Введіть свій номер телефону:",
+        "ru": "Введите свой номер телефона:"
+    },
+    "choose_names": {
+        "en": "Select the names of the visitors:",
+        "ro": "Selectați numele vizitatorilor:",
+        "uk": "Виберіть імена відвідувачів:",
+        "ru": "Выберите имена посетителей:"
+    },
+    "number_of_visitors": {
+        "en": "Number of visitors:",
+        "ro": "Numărul de vizitatori:",
+        "uk": "Кількість відвідувачів:",
+        "ru": "Количество посетителей:"
+    },
+    "provide_name": {
+        "en": "Enter your name:",
+        "ro": "Introduceți numele dvs.:",
+        "uk": "Введіть своє ім'я:",
+        "ru": "Введите свое имя:"
+    },
+    "select_organization": {
+        "en": "Select your organization:",
+        "ro": "Selectați organizația dvs.:",
+        "uk": "Виберіть свою організацію:",
+        "ru": "Выберите вашу организацию:"
+    },
+    "select_position": {
+        "en": "Select your position:",
+        "ro": "Selectați poziția dvs.:",
+        "uk": "Виберіть свою позицію:",
+        "ru": "Выберите свою позицию:"
+    },
+    "project_manager": {
+        "en": "Project Manager",
+        "ro": "Manager de Proiect",
+        "uk": "Менеджер проекту",
+        "ru": "Менеджер проекта"
+    },
+    "country_director": {
+        "en": "Country Director",
+        "ro": "Director de Țară",
+        "uk": "Директор країни",
+        "ru": "Директор страны"
+    },
+    "monitoring_officer": {
+        "en": "Monitoring Officer",
+        "ro": "Ofițer de Monitorizare",
+        "uk": "Офіцер моніторингу",
+        "ru": "Офицер мониторинга"
+    },
+    "audit_officer": {
+        "en": "Audit Officer",
+        "ro": "Ofițer de Audit",
+        "uk": "Аудитор",
+        "ru": "Аудитор"
+    },
+    "data_enumerator": {
+        "en": "Data Enumerator",
+        "ro": "Enumărător de Date",
+        "uk": "Оператор даних",
+        "ru": "Оператор данных"
+    },
+    "visit_purpose": {
+        "en": "Please select your purpose(s) of visit:",
+        "ro": "Vă rugăm să selectați scopul/scopurile vizitei dvs.:",
+        "uk": "Будь ласка, виберіть мету/мети вашого візиту:",
+        "ru": "Пожалуйста, выберите цель/цели вашего визита:"
     },
     "receive_assistance": {
         "en": "Receive Assistance",
@@ -152,96 +230,93 @@ def main():
     st.title("Moldova for Peace Hub Entry-Stand")
     st.markdown(f"<b>{texts['select_language']['en']}</b>", unsafe_allow_html=True)
     
-    language = st.radio(
-        "",
-        ["English", "Română", "Українська", "Русский"],
-        format_func=lambda lang: lang
-    )
-    
-    lang_code = get_language_code(language)
+    # Language selection as horizontal multiple choice options
+    cols = st.columns(4)
+    languages = ["English", "Română", "Українська", "Русский"]
+    selected_lang = cols[0].radio("", [languages[0]], key="lang0")
+    selected_lang = cols[1].radio("", [languages[1]], key="lang1")
+    selected_lang = cols[2].radio("", [languages[2]], key="lang2")
+    selected_lang = cols[3].radio("", [languages[3]], key="lang3")
+
+    lang_code = get_language_code(selected_lang)
     st.session_state['lang_code'] = lang_code
 
     # Display welcome message
     st.header(texts["welcome"][lang_code])
 
     # Select visitor type
-    visitor_type = st.radio(
+    cols = st.columns(2)
+    visitor_type = cols[0].radio(
         texts["visitor_type"][lang_code],
-        [texts["individual"][lang_code], texts["organization"][lang_code]]
+        [texts["individual"][lang_code], texts["organization"][lang_code]],
+        index=0, key="visitor_type0"
+    )
+    visitor_type = cols[1].radio(
+        "",
+        [texts["organization"][lang_code], texts["individual"][lang_code]],
+        index=1, key="visitor_type1"
     )
 
-    # Select visit type based on visitor type
     if visitor_type == texts["individual"][lang_code]:
-        visit_type = st.selectbox(
-            texts["visit_type_individual"][lang_code],
-            [
-                texts["receive_assistance"][lang_code],
-                texts["just_visit"][lang_code],
-                texts["attend_event"][lang_code],
-                texts["attend_workshop"][lang_code]
-            ]
-        )
+        handle_individual_workflow(lang_code)
     else:
-        visit_type = st.selectbox(
-            texts["visit_type_organization"][lang_code],
-            [
-                texts["offer_regular_service"][lang_code],
-                texts["offer_single_service"][lang_code],
-                texts["provide_assistance"][lang_code],
-                texts["just_visit"][lang_code]
-            ]
-        )
-
-    # Display recommended service location and map
-    destination = get_destination(visit_type, lang_code)
-    st.write(f"{texts['destination_label'][lang_code]} {destination}")
-    display_map(destination)
+        handle_organization_workflow(lang_code)
 
     # Options to generate and print ticket or generate digital ticket
     col1, col2 = st.columns(2)
     if col1.button(texts["generate_print_ticket"][lang_code]):
-        ticket = generate_ticket(visitor_type, visit_type, lang_code)
+        ticket = generate_ticket(visitor_type, lang_code)
         st.write(ticket)
         st.markdown(texts["map_link"][lang_code])
 
     if col2.button(texts["generate_digital_ticket"][lang_code]):
-        ticket = generate_ticket(visitor_type, visit_type, lang_code)
+        ticket = generate_ticket(visitor_type, lang_code)
         st.write(ticket)
         st.markdown(texts["map_link"][lang_code])
         # Logic to send ticket to Dopamoha (not implemented in this example)
 
-def generate_ticket(visitor_type, visit_type, lang_code):
+def handle_individual_workflow(lang_code):
+    st.subheader(texts["do_you_have_account"][lang_code])
+    has_account = st.radio("", [texts["yes"][lang_code], texts["no"][lang_code]], index=0)
+
+    if has_account == texts["yes"][lang_code]:
+        phone_number = st.text_input(texts["phone_number"][lang_code])
+        if len(phone_number) >= 9:
+            visitor_names = st.multiselect(
+                texts["choose_names"][lang_code],
+                ["Андрій", "Марія", "Олександр", "Іван", "Катерина"]  # Example names in Russian
+            )
+    else:
+        visitor_name = st.text_input(texts["provide_name"][lang_code])
+        num_visitors = st.number_input(texts["number_of_visitors"][lang_code], min_value=1, max_value=10)
+
+def handle_organization_workflow(lang_code):
+    org_name = st.selectbox(
+        texts["select_organization"][lang_code],
+        ["Org1", "Org2", "Org3", "Org4", "Org5"]
+    )
+    position = st.selectbox(
+        texts["select_position"][lang_code],
+        [
+            texts["project_manager"][lang_code],
+            texts["country_director"][lang_code],
+            texts["monitoring_officer"][lang_code],
+            texts["audit_officer"][lang_code],
+            texts["data_enumerator"][lang_code]
+        ]
+    )
+    contact_name = st.text_input(texts["provide_name"][lang_code])
+
+def generate_ticket(visitor_type, lang_code):
     ticket_details = {
         "visitor_type": visitor_type,
-        "visit_type": visit_type,
-        "destination": get_destination(visit_type, lang_code)
+        "destination": "Destination"
     }
     return (
         f"{texts['ticket'][lang_code]}\n\n"
         f"{texts['visitor_type_label'][lang_code]} {ticket_details['visitor_type']}\n"
-        f"{texts['visit_type_label'][lang_code]} {ticket_details['visit_type']}\n"
         f"{texts['destination_label'][lang_code]} {ticket_details['destination']}"
     )
-
-def get_destination(visit_type, lang_code):
-    destinations = {
-        texts["receive_assistance"][lang_code]: "Assistance Desk",
-        texts["just_visit"][lang_code]: "Reception",
-        texts["attend_event"][lang_code]: "Event Hall",
-        texts["attend_workshop"][lang_code]: "Workshop Room",
-        texts["offer_regular_service"][lang_code]: "Service Office",
-        texts["offer_single_service"][lang_code]: "Service Desk",
-        texts["provide_assistance"][lang_code]: "Assistance Office",
-    }
-    return destinations.get(visit_type, "General Area")
-
-def display_map(destination):
-    fig, ax = plt.subplots()
-    ax.set_xlim(0, 100)
-    ax.set_ylim(0, 100)
-    ax.plot(*service_locations[destination], 'ro')  # Mark the destination with a red dot
-    ax.text(*service_locations[destination], destination, fontsize=12, ha='right')
-    st.pyplot(fig)
 
 def get_language_code(language):
     language_codes = {
@@ -251,6 +326,14 @@ def get_language_code(language):
         "Русский": "ru"
     }
     return language_codes.get(language, "en")
+
+def display_map(destination):
+    fig, ax = plt.subplots()
+    ax.set_xlim(0, 100)
+    ax.set_ylim(0, 100)
+    ax.plot(*service_locations[destination], 'ro')  # Mark the destination with a red dot
+    ax.text(*service_locations[destination], destination, fontsize=12, ha='right')
+    st.pyplot(fig)
 
 if __name__ == "__main__":
     main()
