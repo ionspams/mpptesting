@@ -299,19 +299,20 @@ def handle_individual_workflow(lang_code):
 def handle_organization_workflow(lang_code):
     org_name = st.selectbox(
         texts["select_organization"][lang_code],
-        ["Org1", "Org2", "Org3", "Org4", "Org5"],
-        index=-1
+        ["Select your organization", "Org1", "Org2", "Org3", "Org4", "Org5"],
+        index=0
     )
     position = st.selectbox(
         texts["select_position"][lang_code],
         [
+            "Select your position",
             texts["project_manager"][lang_code],
             texts["country_director"][lang_code],
             texts["monitoring_officer"][lang_code],
             texts["audit_officer"][lang_code],
             texts["data_enumerator"][lang_code]
         ],
-        index=-1
+        index=0
     )
     contact_name = st.text_input(texts["provide_name"][lang_code])
 
