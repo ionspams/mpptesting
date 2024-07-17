@@ -125,32 +125,26 @@ texts = {
 }
 
 def main():
+    st.set_page_config(page_title="Moldova for Peace Entry-Stand", layout="wide")
     # Language selection page
     st.title("Moldova for Peace Hub Entry-Stand")
     language = st.selectbox(
-        "Please select your language to continue:",
+        texts["continue"]["en"],
         ["English", "Română", "Українська", "Русский"]
     )
     lang_code = get_language_code(language)
-    
-    if 'lang_code' not in st.session_state:
-        st.session_state['lang_code'] = lang_code
+    st.session_state['lang_code'] = lang_code
 
-    if st.button("Continue"):
-        st.session_state['lang_code'] = lang_code
-        st.session_state['page'] = "home"
+    # Display welcome message
+    st.header(texts["welcome"][lang_code])
 
-    if 'page' in st.session_state and st.session_state['page'] == "home":
-        home_page(st.session_state['lang_code'])
-
-def home_page(lang_code):
-    st.title(texts["welcome"][lang_code])
-
+    # Select visitor type
     visitor_type = st.radio(
         texts["visitor_type"][lang_code],
         [texts["individual"][lang_code], texts["organization"][lang_code]]
     )
 
+    # Select visit type based on visitor type
     if visitor_type == texts["individual"][lang_code]:
         visit_type = st.selectbox(
             texts["visit_type_individual"][lang_code],
@@ -172,6 +166,7 @@ def home_page(lang_code):
             ]
         )
 
+    # Display ticket details
     if st.button(texts["generate_ticket"][lang_code]):
         ticket = generate_ticket(visitor_type, visit_type, lang_code)
         st.write(ticket)
