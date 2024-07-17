@@ -1,5 +1,8 @@
 import streamlit as st
 import matplotlib.pyplot as plt
+import random
+import string
+import datetime
 
 # Dictionary for multilingual text
 texts = {
@@ -223,6 +226,17 @@ service_locations = {
     "Assistance Office": (60, 60)
 }
 
+# Short descriptions for each type of service
+service_descriptions = {
+    "Assistance Desk": "Provides general assistance and guidance for various needs.",
+    "Reception": "General information and directions for visitors.",
+    "Event Hall": "Location for attending events and large gatherings.",
+    "Workshop Room": "Space for attending workshops and focus group meetings.",
+    "Service Office": "Office for regular service offerings and consultations.",
+    "Service Desk": "Desk for one-time service offerings.",
+    "Assistance Office": "Office for providing specialized assistance."
+}
+
 def main():
     st.set_page_config(page_title="Moldova for Peace Entry-Stand", layout="centered")
     
@@ -262,12 +276,16 @@ def main():
     if col1.button(texts["generate_print_ticket"][lang_code]):
         ticket = generate_ticket(visitor_type, lang_code)
         st.write(ticket)
-        st.markdown(texts["map_link"][lang_code])
+        # Display map and destination
+        display_map(ticket["destination"])
+        st.write(service_descriptions[ticket["destination"]])
 
     if col2.button(texts["generate_digital_ticket"][lang_code]):
         ticket = generate_ticket(visitor_type, lang_code)
         st.write(ticket)
-        st.markdown(texts["map_link"][lang_code])
+        # Display map and destination
+        display_map(ticket["destination"])
+        st.write(service_descriptions[ticket["destination"]])
         # Logic to send ticket to Dopamoha (not implemented in this example)
 
 def handle_individual_workflow(lang_code):
@@ -328,15 +346,26 @@ def handle_organization_workflow(lang_code):
     )
 
 def generate_ticket(visitor_type, lang_code):
+    # Generate ticket ID
+    ticket_id = generate_ticket_id(visitor_type[0].upper())
+    destination = random.choice(list(service_locations.keys()))  # Random destination for demo purposes
     ticket_details = {
+        "ticket_id": ticket_id,
         "visitor_type": visitor_type,
-        "destination": "Destination"
+        "destination": destination
     }
     return (
         f"{texts['ticket'][lang_code]}\n\n"
         f"{texts['visitor_type_label'][lang_code]} {ticket_details['visitor_type']}\n"
+        f"{texts['visit_type_label'][lang_code]} {ticket_details['ticket_id']}\n"
         f"{texts['destination_label'][lang_code]} {ticket_details['destination']}"
     )
+
+def generate_ticket_id(prefix):
+    now = datetime.datetime.now()
+    random_digits = ''.join(random.choices(string.digits, k=3))
+    ticket_id = f"{prefix}{random_digits}"
+    return ticket_id
 
 def get_language_code(language):
     language_codes = {
@@ -353,6 +382,7 @@ def display_map(destination):
     ax.set_ylim(0, 100)
     ax.plot(*service_locations[destination], 'ro')  # Mark the destination with a red dot
     ax.text(*service_locations[destination], destination, fontsize=12, ha='right')
+    ax.set_title('Service Locations')
     st.pyplot(fig)
 
 if __name__ == "__main__":
