@@ -1,4 +1,5 @@
 import streamlit as st
+import matplotlib.pyplot as plt
 
 # Dictionary for multilingual text
 texts = {
@@ -9,7 +10,10 @@ texts = {
         "ru": "Добро пожаловать на стенд входа Молдова за мир"
     },
     "select_language": {
-        "multi": "Please select your language to continue:\nSelectați limba pentru a continua:\nВиберіть мову для продовження:\nВыберите язык для продолжения:"
+        "multi": """<b>Please select your language to continue:</b><br>
+                    Selectați limba pentru a continua:<br>
+                    Виберіть мову для продовження:<br>
+                    Выберите язык для продолжения:"""
     },
     "visitor_type": {
         "en": "Are you an individual or representing an organization?",
@@ -149,8 +153,9 @@ def main():
     
     # Language selection page
     st.title("Moldova for Peace Hub Entry-Stand")
+    st.markdown(texts["select_language"]["multi"], unsafe_allow_html=True)
     language = st.selectbox(
-        texts["select_language"]["multi"],
+        "",
         ["English", "Română", "Українська", "Русский"]
     )
     lang_code = get_language_code(language)
@@ -231,8 +236,6 @@ def get_destination(visit_type, lang_code):
     return destinations.get(visit_type, "General Area")
 
 def display_map(destination):
-    import matplotlib.pyplot as plt
-
     fig, ax = plt.subplots()
     ax.set_xlim(0, 100)
     ax.set_ylim(0, 100)
