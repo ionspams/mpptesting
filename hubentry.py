@@ -10,10 +10,7 @@ texts = {
         "ru": "Добро пожаловать на стенд входа Молдова за мир"
     },
     "select_language": {
-        "multi": """<b>Please select your language to continue:</b><br>
-                    Selectați limba pentru a continua:<br>
-                    Виберіть мову для продовження:<br>
-                    Выберите язык для продолжения:"""
+        "en": "Please select your language to continue:",
     },
     "visitor_type": {
         "en": "Are you an individual or representing an organization?",
@@ -153,11 +150,14 @@ def main():
     
     # Language selection page
     st.title("Moldova for Peace Hub Entry-Stand")
-    st.markdown(texts["select_language"]["multi"], unsafe_allow_html=True)
-    language = st.selectbox(
+    st.markdown(f"<b>{texts['select_language']['en']}</b>", unsafe_allow_html=True)
+    
+    language = st.radio(
         "",
-        ["English", "Română", "Українська", "Русский"]
+        ["English", "Română", "Українська", "Русский"],
+        format_func=lambda lang: lang
     )
+    
     lang_code = get_language_code(language)
     st.session_state['lang_code'] = lang_code
 
