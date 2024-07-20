@@ -1,7 +1,6 @@
 import streamlit as st
 import requests
-import qrcode
-from PIL import Image
+import segno
 import io
 
 st.title("URL Shortener with Custom Suffix and QR Code")
@@ -22,20 +21,9 @@ if st.button("Generate"):
         if qr_only:
             try:
                 # Generate QR code without shortening URL
-                qr = qrcode.QRCode(
-                    version=1,
-                    error_correction=qrcode.constants.ERROR_CORRECT_L,
-                    box_size=10,
-                    border=4,
-                )
-                qr.add_data(long_url)
-                qr.make(fit=True)
-
-                img = qr.make_image(fill_color="black", back_color="white")
-
-                # Save the image to a buffer
+                qr = segno.make(long_url)
                 buf = io.BytesIO()
-                img.save(buf, format="PNG")
+                qr.save(buf, kind='png')
                 buf.seek(0)
 
                 # Display the QR code
@@ -83,14 +71,13 @@ if st.button("Generate"):
                                 st.error(f"Error creating custom short URL: {custom_response.status_code} - {custom_response.text}")
 
                         # Step 3: Generate QR code for the shortened URL
-                        qr_response = requests.get(f"https://api-ssl.bitly.com/v4/bitlinks/{bitlink_id}/qr", headers=headers)
+                        qr = segno.make(short_url)
+                        buf = io.BytesIO()
+                        qr.save(buf, kind='png')
+                        buf.seek(0)
 
-                        if qr_response.status_code == 200:
-                            qr_code_url = qr_response.json()["qr_code"]
-                            st.success("QR Code generated successfully")
-                            st.image(qr_code_url, caption="QR Code")
-                        else:
-                            st.error(f"Error generating QR code: {qr_response.status_code} - {qr_response.text}")
+                        st.success("QR Code generated successfully")
+                        st.image(buf, caption="QR Code", use_column_width=True)
                     else:
                         st.error(f"Error: {response.status_code} - {response.text}")
                 except Exception as e:
