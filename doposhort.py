@@ -1,4 +1,5 @@
 import streamlit as st
+import requests
 import qrcode
 from PIL import Image
 import io
