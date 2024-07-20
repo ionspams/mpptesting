@@ -1,45 +1,158 @@
-import streamlit as st
-import requests
+Custom Bitlinks
+These endpoints are for updating custom Bitlinks only. Custom Bitlinks have both a BSD and a customized back-half (e.g., yourcompany.com/yourcampaign). If a link begins with the bit.ly domain or ends with an auto-generated random string it is not a custom Bitlink.
 
-st.title("URL Shortener with Custom Suffix")
+Add Custom Bitlink
+ /v4/custom_bitlinks
+Add a keyword (or "custom back-half") to a Bitlink with a Custom Domain (domains must match). This endpoint can also be used for initial redirects to a link.
 
-# Sidebar settings for Bitly API key
-st.sidebar.header("Settings")
-bitly_api_key = st.sidebar.text_input("Bitly API Key", type="password")
+Request Body Schema
+custom_bitlinkstring
+bitlink_idstring
+Request
 
-if not bitly_api_key:
-    st.warning("Please enter your Bitly API Key in the sidebar settings.")
-    st.stop()
+cURL
+curl \
+-H 'Authorization: Bearer {TOKEN}' \
+-H 'Content-Type: application/json' \
+-X POST \
+-d '{
+  "custom_bitlink": "chauncey.ly/documentation",
+  "bitlink_id": "chauncey.ly/1234abcd"
+}' \
+https://api-ssl.bitly.com/v4/custom_bitlinks
+Response
 
-# Main section for URL input and custom suffix
-long_url = st.text_input("Enter the long URL")
-custom_suffix = st.text_input("Enter custom suffix (optional)")
+200 SUCCESS
+{
+  "custom_bitlink": "string",
+  "bitlink": {
+    "references": { "any" },
+    "link": "string",
+    "id": "string",
+    "long_url": "string",
+    "title": "string",
+    "archived": "boolean",
+    "created_at": "string",
+    "created_by": "string",
+    "client_id": "string",
+    "custom_bitlinks": [
+      "string"
+    ],
+    "tags": [
+      "string"
+    ],
+    "launchpad_ids": [
+      "string"
+    ],
+    "deeplinks": [
+      {
+        "guid": "string",
+        "bitlink": "string",
+        "app_uri_path": "string",
+        "install_url": "string",
+        "app_guid": "string",
+        "os": "string",
+        "install_type": "string",
+        "created": "string",
+        "modified": "string",
+        "brand_guid": "string"
+      }
+    ],
+    "campaign_ids": [
+      "string"
+    ]
+  },
+  "bitlink_history": [
+    {
+      "uuid": "string",
+      "group_guid": "string",
+      "keyword": "string",
+      "bsd": "string",
+      "hash": "string",
+      "login": "string",
+      "long_url": "string",
+      "created": "string",
+      "first_created": "string",
+      "deactivated": "string",
+      "is_active": "boolean"
+    }
+  ]
+}
+Update Custom Bitlink
+ /v4/custom_bitlinks/{custom_bitlink}
+Move a keyword (or custom back-half) to a different Bitlink (domains must match).
 
-if st.button("Shorten URL"):
-    if not long_url:
-        st.error("Please enter a long URL.")
-    else:
-        headers = {
-            "Authorization": f"Bearer {bitly_api_key}",
-            "Content-Type": "application/json"
-        }
+Path Parameters
+custom_bitlinkstringRequired
+A Custom Bitlink made of the domain and keyword
+Request Body Schema
+bitlink_idstring
+Request
 
-        data = {
-            "long_url": long_url,
-            "domain": "bit.ly"
-        }
+cURL
+curl \
+-H 'Authorization: Bearer {TOKEN}' \
+-H 'Content-Type: application/json' \
+-X PATCH \
+-d '{
+  "bitlink_id": "chauncey.ly/1234abcd"
+}' \
+https://api-ssl.bitly.com/v4/custom_bitlinks/chauncey.ly/chauncey
+Response
 
-        if custom_suffix:
-            data["custom_bitlinks"] = [f"bit.ly/{custom_suffix}"]
-
-        response = requests.post("https://api-ssl.bitly.com/v4/shorten", headers=headers, json=data)
-
-        if response.status_code == 200:
-            short_url = response.json()["link"]
-            st.success(f"Short URL: {short_url}")
-            st.markdown(f"[{short_url}]({short_url})")
-        else:
-            st.error(f"Error: {response.status_code} - {response.text}")
-
-st.sidebar.markdown("[Get your Bitly API Key](https://dev.bitly.com/)")
-
+200 SUCCESS
+{
+  "custom_bitlink": "string",
+  "bitlink": {
+    "references": { "any" },
+    "link": "string",
+    "id": "string",
+    "long_url": "string",
+    "title": "string",
+    "archived": "boolean",
+    "created_at": "string",
+    "created_by": "string",
+    "client_id": "string",
+    "custom_bitlinks": [
+      "string"
+    ],
+    "tags": [
+      "string"
+    ],
+    "launchpad_ids": [
+      "string"
+    ],
+    "deeplinks": [
+      {
+        "guid": "string",
+        "bitlink": "string",
+        "app_uri_path": "string",
+        "install_url": "string",
+        "app_guid": "string",
+        "os": "string",
+        "install_type": "string",
+        "created": "string",
+        "modified": "string",
+        "brand_guid": "string"
+      }
+    ],
+    "campaign_ids": [
+      "string"
+    ]
+  },
+  "bitlink_history": [
+    {
+      "uuid": "string",
+      "group_guid": "string",
+      "keyword": "string",
+      "bsd": "string",
+      "hash": "string",
+      "login": "string",
+      "long_url": "string",
+      "created": "string",
+      "first_created": "string",
+      "deactivated": "string",
+      "is_active": "boolean"
+    }
+  ]
+}
