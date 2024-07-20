@@ -1,5 +1,5 @@
 streamlit
 matplotlib
-qrcode
-io
-PIL
+requests==2.31.0
+qrcode[pil]==7.3.1
+Pillow==9.1.1
