@@ -32,7 +32,7 @@ if st.button("Generate"):
                 qr.make(fit=True)
 
                 img = qr.make_image(fill_color="black", back_color="white")
-                
+
                 # Save the image to a buffer
                 buf = io.BytesIO()
                 img.save(buf, format="PNG")
@@ -83,23 +83,14 @@ if st.button("Generate"):
                                 st.error(f"Error creating custom short URL: {custom_response.status_code} - {custom_response.text}")
 
                         # Step 3: Generate QR code for the shortened URL
-                        qr = qrcode.QRCode(
-                            version=1,
-                            error_correction=qrcode.constants.ERROR_CORRECT_L,
-                            box_size=10,
-                            border=4,
-                        )
-                        qr.add_data(short_url)
-                        qr.make(fit=True)
+                        qr_response = requests.get(f"https://api-ssl.bitly.com/v4/bitlinks/{bitlink_id}/qr", headers=headers)
 
-                        img = qr.make_image(fill_color="black", back_color="white")
-
-                        buf = io.BytesIO()
-                        img.save(buf, format="PNG")
-                        buf.seek(0)
-
-                        st.success("QR Code generated successfully")
-                        st.image(buf, caption="QR Code", use_column_width=True)
+                        if qr_response.status_code == 200:
+                            qr_code_url = qr_response.json()["qr_code"]
+                            st.success("QR Code generated successfully")
+                            st.image(qr_code_url, caption="QR Code")
+                        else:
+                            st.error(f"Error generating QR code: {qr_response.status_code} - {qr_response.text}")
                     else:
                         st.error(f"Error: {response.status_code} - {response.text}")
                 except Exception as e:
