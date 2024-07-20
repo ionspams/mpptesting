@@ -42,3 +42,4 @@ if st.button("Shorten URL"):
             st.error(f"Error: {response.status_code} - {response.text}")
 
 st.sidebar.markdown("[Get your Bitly API Key](https://dev.bitly.com/)")
+
