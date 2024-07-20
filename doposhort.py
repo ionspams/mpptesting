@@ -41,7 +41,8 @@ if st.button("Generate"):
         if qr_only:
             qr_buffer = generate_qr_code(long_url)
             if qr_buffer:
-                st.image(qr_buffer, caption="QR Code", use_column_width=True)
+                image = Image.open(qr_buffer)
+                st.image(image, caption="QR Code", use_column_width=True)
         else:
             if not bitly_api_key:
                 st.warning("Please enter your Bitly API Key in the sidebar settings to shorten URLs.")
@@ -86,8 +87,9 @@ if st.button("Generate"):
                         # Step 3: Generate QR code for the shortened URL
                         qr_buffer = generate_qr_code(short_url)
                         if qr_buffer:
+                            image = Image.open(qr_buffer)
                             st.success("QR Code generated successfully")
-                            st.image(qr_buffer, caption="QR Code", use_column_width=True)
+                            st.image(image, caption="QR Code", use_column_width=True)
                     else:
                         st.error(f"Error: {response.status_code} - {response.text}")
                 except Exception as e:
