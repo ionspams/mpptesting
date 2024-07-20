@@ -34,10 +34,9 @@ if st.button("Generate"):
 
             # Display the QR code
             buf = io.BytesIO()
-            img.save(buf)
+            img.save(buf, format="PNG")
             buf.seek(0)
-            img = Image.open(buf)
-            st.image(img, caption="QR Code")
+            st.image(buf, caption="QR Code", use_column_width=True)
         else:
             if not bitly_api_key:
                 st.warning("Please enter your Bitly API Key in the sidebar settings to shorten URLs.")
