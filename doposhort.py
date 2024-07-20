@@ -31,7 +31,7 @@ if st.button("Generate"):
                 qr.add_data(long_url)
                 qr.make(fit=True)
 
-                img = qr.make_image(fill_color="black", back_color="white")
+                img = qr.make_image(fill_color="black", back_color="white").convert('RGB')
 
                 # Save the image to a buffer
                 buf = io.BytesIO()
