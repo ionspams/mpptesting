@@ -33,10 +33,12 @@ if st.button("Generate"):
 
                 img = qr.make_image(fill_color="black", back_color="white")
 
-                # Display the QR code
+                # Save the image to a buffer
                 buf = io.BytesIO()
                 img.save(buf, format="PNG")
                 buf.seek(0)
+
+                # Display the QR code
                 st.image(buf, caption="QR Code", use_column_width=True)
             except Exception as e:
                 st.error(f"Error generating QR code: {e}")
