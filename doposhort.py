@@ -31,7 +31,7 @@ if st.button("Generate"):
                 qr.add_data(long_url)
                 qr.make(fit=True)
 
-                img = qr.make_image(fill_color="black", back_color="white").convert('RGB')
+                img = qr.make_image(fill_color="black", back_color="white")
 
                 # Save the image to a buffer
                 buf = io.BytesIO()
@@ -42,7 +42,6 @@ if st.button("Generate"):
                 st.image(buf, caption="QR Code", use_column_width=True)
             except Exception as e:
                 st.error(f"Error generating QR code: {e}")
-                st.text(f"Exception details: {e}")
         else:
             if not bitly_api_key:
                 st.warning("Please enter your Bitly API Key in the sidebar settings to shorten URLs.")
@@ -96,6 +95,5 @@ if st.button("Generate"):
                         st.error(f"Error: {response.status_code} - {response.text}")
                 except Exception as e:
                     st.error(f"Error processing request: {e}")
-                    st.text(f"Exception details: {e}")
 
 st.sidebar.markdown("[Get your Bitly API Key](https://dev.bitly.com/)")
