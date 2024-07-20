@@ -1,6 +1,7 @@
 import streamlit as st
 import requests
-import segno
+import qrcode
+from PIL import Image
 import io
 
 st.title("URL Shortener with Custom Suffix and QR Code")
@@ -21,12 +22,22 @@ if st.button("Generate"):
         if qr_only:
             try:
                 # Generate QR code without shortening URL
-                qr = segno.make(long_url)
-                buf = io.BytesIO()
-                qr.save(buf, kind='png')
-                buf.seek(0)
-                buf.name = "qrcode.png"
+                qr = qrcode.QRCode(
+                    version=1,
+                    error_correction=qrcode.constants.ERROR_CORRECT_L,
+                    box_size=10,
+                    border=4,
+                )
+                qr.add_data(long_url)
+                qr.make(fit=True)
+
+                img = qr.make_image(fill_color="black", back_color="white")
                 
+                # Save the image to a buffer
+                buf = io.BytesIO()
+                img.save(buf, format="PNG")
+                buf.seek(0)
+
                 # Display the QR code
                 st.image(buf, caption="QR Code", use_column_width=True)
             except Exception as e:
@@ -72,11 +83,20 @@ if st.button("Generate"):
                                 st.error(f"Error creating custom short URL: {custom_response.status_code} - {custom_response.text}")
 
                         # Step 3: Generate QR code for the shortened URL
-                        qr = segno.make(short_url)
+                        qr = qrcode.QRCode(
+                            version=1,
+                            error_correction=qrcode.constants.ERROR_CORRECT_L,
+                            box_size=10,
+                            border=4,
+                        )
+                        qr.add_data(short_url)
+                        qr.make(fit=True)
+
+                        img = qr.make_image(fill_color="black", back_color="white")
+
                         buf = io.BytesIO()
-                        qr.save(buf, kind='png')
+                        img.save(buf, format="PNG")
                         buf.seek(0)
-                        buf.name = "qrcode.png"
 
                         st.success("QR Code generated successfully")
                         st.image(buf, caption="QR Code", use_column_width=True)
