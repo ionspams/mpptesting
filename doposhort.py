@@ -25,7 +25,8 @@ if st.button("Generate"):
                 buf = io.BytesIO()
                 qr.save(buf, kind='png')
                 buf.seek(0)
-
+                buf.name = "qrcode.png"
+                
                 # Display the QR code
                 st.image(buf, caption="QR Code", use_column_width=True)
             except Exception as e:
@@ -75,6 +76,7 @@ if st.button("Generate"):
                         buf = io.BytesIO()
                         qr.save(buf, kind='png')
                         buf.seek(0)
+                        buf.name = "qrcode.png"
 
                         st.success("QR Code generated successfully")
                         st.image(buf, caption="QR Code", use_column_width=True)
