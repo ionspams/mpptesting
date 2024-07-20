@@ -1,7 +1,7 @@
 import streamlit as st
 import requests
 
-st.title("URL Shortener with Custom Suffix")
+st.title("URL Shortener with Custom Suffix and QR Code")
 
 # Sidebar settings for Bitly API key
 st.sidebar.header("Settings")
@@ -53,6 +53,17 @@ if st.button("Shorten URL"):
                     st.markdown(f"[{custom_short_url}]({custom_short_url})")
                 else:
                     st.error(f"Error creating custom short URL: {custom_response.status_code} - {custom_response.text}")
+
+            # Step 3: Generate QR code
+            qr_response = requests.get(f"https://api-ssl.bitly.com/v4/bitlinks/{bitlink_id}/qr", headers=headers)
+
+            if qr_response.status_code == 200:
+                qr_code_url = qr_response.json()["qr_code"]
+                st.success("QR Code generated successfully")
+                st.image(qr_code_url, caption="QR Code")
+            else:
+                st.error(f"Error generating QR code: {qr_response.status_code} - {qr_response.text}")
+
         else:
             st.error(f"Error: {response.status_code} - {response.text}")
 
