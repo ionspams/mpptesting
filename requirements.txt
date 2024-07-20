@@ -1,2 +1,5 @@
 streamlit
 matplotlib
+qrcode
+io
+PIL
