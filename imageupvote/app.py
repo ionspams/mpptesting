@@ -22,19 +22,23 @@ def display_images_with_votes(image_urls):
         image_url = f"{RAW_GITHUB_URL}{image_name}"
         try:
             response = requests.get(image_url)
-            response.raise_for_status()
-            image = Image.open(BytesIO(response.content))
-            st.image(image, use_column_width=True)
-            
-            col1, col2 = st.columns(2)
-            with col1:
-                if st.button("👍 Upvote", key=f"upvote_{image_url}"):
-                    st.session_state[image_url] = st.session_state.get(image_url, 0) + 1
-            with col2:
-                if st.button("👎 Downvote", key=f"downvote_{image_url}"):
-                    st.session_state[image_url] = st.session_state.get(image_url, 0) - 1
-            
-            st.write(f"Votes: {st.session_state.get(image_url, 0)}")
+            response.raise_for_status()  # Check if the request was successful
+            # Ensure content is an image
+            if 'image' in response.headers['Content-Type']:
+                image = Image.open(BytesIO(response.content))
+                st.image(image, use_column_width=True)
+                
+                col1, col2 = st.columns(2)
+                with col1:
+                    if st.button("👍 Upvote", key=f"upvote_{image_url}"):
+                        st.session_state[image_url] = st.session_state.get(image_url, 0) + 1
+                with col2:
+                    if st.button("👎 Downvote", key=f"downvote_{image_url}"):
+                        st.session_state[image_url] = st.session_state.get(image_url, 0) - 1
+                
+                st.write(f"Votes: {st.session_state.get(image_url, 0)}")
+            else:
+                st.error(f"Failed to load image {image_name}. Content is not an image.")
         except UnidentifiedImageError:
             st.error(f"Failed to open image {image_name}. The image format might be unsupported.")
         except requests.exceptions.RequestException as e:
