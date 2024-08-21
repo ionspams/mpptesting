@@ -1,21 +1,16 @@
 import streamlit as st
-import os
 import requests
 from PIL import Image
 from io import BytesIO
 
 # GitHub Repository Details
-GITHUB_REPO = "https://github.com/<username>/<repository>"  # Replace with your GitHub repo URL
-RAW_GITHUB_URL = "https://raw.githubusercontent.com/<username>/<repository>/main/"  # Replace <username> and <repository> with your details
+RAW_GITHUB_URL = "https://raw.githubusercontent.com/ionspams/mpptesting/m4phub/imageupvote/"
 
-# Function to fetch images from a specific folder in the GitHub repo
-def fetch_images_from_github(folder):
-    url = f"{RAW_GITHUB_URL}{folder}/"
-    response = requests.get(url)
-    images = []
-    if response.status_code == 200:
-        images = [f"{url}{img}" for img in response.text.splitlines() if img.endswith(('.png', '.jpg', '.jpeg', '.gif'))]
-    return images
+# Function to fetch images from the specific 'imageupvote' folder
+def fetch_images_from_github():
+    # Assuming the images are directly under 'imageupvote' in your repository
+    images = ["image1.jpg", "image2.png", "image3.jpeg"]  # Replace with actual image names or automate if you have many
+    return [f"{RAW_GITHUB_URL}{img}" for img in images]
 
 # Function to display the voting interface
 def display_images_with_votes(image_urls):
@@ -35,20 +30,12 @@ def display_images_with_votes(image_urls):
         st.write(f"Votes: {st.session_state.get(image_url, 0)}")
 
 # Streamlit App UI
-st.title("Pick and Choose")
+st.title("Pick and Choose - Image Upvote")
 
-# Sidebar for selecting project folders
-project_folder = st.sidebar.selectbox("Select Project Folder", os.listdir("path_to_local_repo"))  # Replace with dynamic GitHub fetch
-st.sidebar.write("Select a project to view images and vote")
-st.sidebar.button("Hide Sidebar")
+# Fetch and display images
+images = fetch_images_from_github()
 
-if project_folder:
-    st.write(f"Project: {project_folder}")
-    images = fetch_images_from_github(project_folder)
-    
-    if images:
-        display_images_with_votes(images)
-    else:
-        st.write("No images found in this project folder.")
-
-# Run this app with `streamlit run app.py` and replace the GitHub URL parts with actual details.
+if images:
+    display_images_with_votes(images)
+else:
+    st.write("No images found in the 'imageupvote' folder.")
