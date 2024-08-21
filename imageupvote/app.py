@@ -1,41 +1,52 @@
 import streamlit as st
 import requests
-from PIL import Image
+from PIL import Image, UnidentifiedImageError
 from io import BytesIO
 
 # GitHub Repository Details
 RAW_GITHUB_URL = "https://raw.githubusercontent.com/ionspams/mpptesting/m4phub/imageupvote/"
 
-# Function to fetch images from the specific 'imageupvote' folder
-def fetch_images_from_github():
-    # Assuming the images are directly under 'imageupvote' in your repository
-    images = ["image1.jpg", "image2.png", "image3.jpeg"]  # Replace with actual image names or automate if you have many
-    return [f"{RAW_GITHUB_URL}{img}" for img in images]
+# Function to fetch image list from images.txt
+def fetch_image_list():
+    image_list_url = f"{RAW_GITHUB_URL}images.txt"
+    response = requests.get(image_list_url)
+    if response.status_code == 200:
+        return response.text.splitlines()
+    else:
+        st.error("Failed to fetch image list.")
+        return []
 
-# Function to display the voting interface
+# Function to fetch and display images with voting options
 def display_images_with_votes(image_urls):
-    for image_url in image_urls:
-        response = requests.get(image_url)
-        image = Image.open(BytesIO(response.content))
-        st.image(image, use_column_width=True)
-        
-        col1, col2 = st.columns(2)
-        with col1:
-            if st.button("👍 Upvote", key=f"upvote_{image_url}"):
-                st.session_state[image_url] = st.session_state.get(image_url, 0) + 1
-        with col2:
-            if st.button("👎 Downvote", key=f"downvote_{image_url}"):
-                st.session_state[image_url] = st.session_state.get(image_url, 0) - 1
-        
-        st.write(f"Votes: {st.session_state.get(image_url, 0)}")
+    for image_name in image_urls:
+        image_url = f"{RAW_GITHUB_URL}{image_name}"
+        try:
+            response = requests.get(image_url)
+            response.raise_for_status()
+            image = Image.open(BytesIO(response.content))
+            st.image(image, use_column_width=True)
+            
+            col1, col2 = st.columns(2)
+            with col1:
+                if st.button("👍 Upvote", key=f"upvote_{image_url}"):
+                    st.session_state[image_url] = st.session_state.get(image_url, 0) + 1
+            with col2:
+                if st.button("👎 Downvote", key=f"downvote_{image_url}"):
+                    st.session_state[image_url] = st.session_state.get(image_url, 0) - 1
+            
+            st.write(f"Votes: {st.session_state.get(image_url, 0)}")
+        except UnidentifiedImageError:
+            st.error(f"Failed to open image {image_name}. The image format might be unsupported.")
+        except requests.exceptions.RequestException as e:
+            st.error(f"Failed to fetch image {image_name}. Error: {str(e)}")
 
 # Streamlit App UI
 st.title("Pick and Choose - Image Upvote")
 
-# Fetch and display images
-images = fetch_images_from_github()
+# Fetch image list from GitHub
+image_list = fetch_image_list()
 
-if images:
-    display_images_with_votes(images)
+if image_list:
+    display_images_with_votes(image_list)
 else:
-    st.write("No images found in the 'imageupvote' folder.")
+    st.write("No images found or failed to load images.")
