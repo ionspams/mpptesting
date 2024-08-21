@@ -2,6 +2,7 @@ import streamlit as st
 import requests
 from PIL import Image, UnidentifiedImageError
 from io import BytesIO
+import urllib.parse
 
 # GitHub Repository Details
 RAW_GITHUB_URL = "https://raw.githubusercontent.com/ionspams/mpptesting/m4phub/imageupvote/"
@@ -19,7 +20,8 @@ def fetch_image_list():
 # Function to fetch and display images with voting options
 def display_images_with_votes(image_urls):
     for image_name in image_urls:
-        image_url = f"{RAW_GITHUB_URL}{image_name}"
+        encoded_image_name = urllib.parse.quote(image_name)
+        image_url = f"{RAW_GITHUB_URL}{encoded_image_name}"
         try:
             response = requests.get(image_url)
             response.raise_for_status()  # Check if the request was successful
