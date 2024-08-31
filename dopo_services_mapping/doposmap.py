@@ -104,9 +104,9 @@ if uploaded_file is not None:
 
         # Display a compact table after the map
         st.write("### Services Table")
-        st.dataframe(
-            active_services[['organization', 'place_name', 'category', 'services_categories', 'city', 'district', 'status']],
-            height=300
+        # st.table instead of st.dataframe to make it less interactive and not downloadable
+        st.table(
+            active_services[['organization', 'place_name', 'category', 'services_categories', 'city', 'district', 'status']]
         )
 
     else:
