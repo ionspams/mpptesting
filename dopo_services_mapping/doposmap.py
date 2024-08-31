@@ -7,6 +7,12 @@ import base64
 # Title of the app
 st.title("Services Mapping Dashboard")
 
+# Disclaimer for Contact Info
+st.markdown("""
+**Disclaimer:** Contact information is currently not displayed publicly as it is not appropriate at this stage. 
+This is a prototype, and not all parties have agreed to have their contact information displayed.
+""")
+
 # Function to download sample CSV
 def get_table_download_link(df):
     csv = df.to_csv(index=False)
@@ -21,13 +27,14 @@ sample_data = pd.DataFrame({
     'category': ['Education', 'Domestic and Sexual Violence, Protection, Education'],
     'city': ['Donduşeni', 'Chişinau'],
     'district': ['Donduşeni', 'Chişinău'],
-    'contact_info': ['casmed.md@gmail.com', 'elena.colesnicova@weworld.it'],
+    'contact_info': ['casmed.md@gmail.com', 'elena.colesnicova@weworld.it'],  # This won't be displayed for now
     'status': ['Active until December 2024', 'Active until December 2025'],
     'latitude': [47.85, 47.01],
     'longitude': [28.12, 28.84],
     'assistance_criteria': ['Criteria 1', 'Criteria 2'],
     'service_additional_details': ['Details 1', 'Details 2'],
-    'pub_hotline': ['+373 67700250', '+373 60949091']
+    'pub_hotline': ['+373 67700250', '+373 60949091'],
+    'services_categories': ['Health, Education', 'Protection, Education, Legal']
 })
 
 # Display sample CSV download link
@@ -45,15 +52,15 @@ if uploaded_file is not None:
     required_columns = [
         'organization', 'place_name', 'category', 'city', 'district', 
         'contact_info', 'status', 'latitude', 'longitude', 
-        'assistance_criteria', 'service_additional_details', 'pub_hotline'
+        'assistance_criteria', 'service_additional_details', 'pub_hotline', 'services_categories'
     ]
     
     if all(column in data.columns for column in required_columns):
         # Filter active services
         active_services = data[data['status'].str.contains('active', case=False, na=False)]
 
-        # Search bar for filtering by city, district, organization, or category
-        search_query = st.text_input("Search by organization, place name, category, city, or district")
+        # Search bar for filtering by city, district, organization, category, or services categories
+        search_query = st.text_input("Search by organization, place name, category, city, district, or services categories")
 
         if search_query:
             active_services = active_services[
@@ -61,7 +68,8 @@ if uploaded_file is not None:
                 active_services['place_name'].str.contains(search_query, case=False, na=False) |
                 active_services['category'].str.contains(search_query, case=False, na=False) |
                 active_services['city'].str.contains(search_query, case=False, na=False) |
-                active_services['district'].str.contains(search_query, case=False, na=False)
+                active_services['district'].str.contains(search_query, case=False, na=False) |
+                active_services['services_categories'].str.contains(search_query, case=False, na=False)
             ]
 
         # Map setup - Display the map first
@@ -80,7 +88,8 @@ if uploaded_file is not None:
                     f"<b>Assistance Criteria:</b> {row.get('assistance_criteria', 'N/A')}<br>"
                     f"<b>Service Additional Details:</b> {additional_details}..."  # Truncate long details
                     f"<br><b>Hotline:</b> {row.get('pub_hotline', 'N/A')}<br>"
-                    f"<b>Organization:</b> {row['organization']}"
+                    f"<b>Organization:</b> {row['organization']}<br>"
+                    f"<b>Services Categories:</b> {row['services_categories']}"
                 )
                 folium.Marker(
                     location=[row['latitude'], row['longitude']],
@@ -96,7 +105,7 @@ if uploaded_file is not None:
         # Display a compact table after the map
         st.write("### Services Table")
         st.dataframe(
-            active_services[['organization', 'place_name', 'category', 'city', 'district', 'contact_info', 'status']],
+            active_services[['organization', 'place_name', 'category', 'services_categories', 'city', 'district', 'status']],
             height=300
         )
 
