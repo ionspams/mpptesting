@@ -64,11 +64,7 @@ if uploaded_file is not None:
                 active_services['district'].str.contains(search_query, case=False, na=False)
             ]
 
-        # Display a simple table
-        st.write("### Services Table")
-        st.dataframe(active_services[['organization', 'place_name', 'category', 'city', 'district', 'contact_info', 'status']])
-
-        # Map setup
+        # Map setup - Display the map first
         if 'latitude' in active_services.columns and 'longitude' in active_services.columns:
             # Center the map on the average of the coordinates
             map_center = [active_services['latitude'].mean(), active_services['longitude'].mean()]
@@ -96,5 +92,13 @@ if uploaded_file is not None:
             folium_static(service_map)
         else:
             st.error("CSV file must contain 'latitude' and 'longitude' columns.")
+
+        # Display a compact table after the map
+        st.write("### Services Table")
+        st.dataframe(
+            active_services[['organization', 'place_name', 'category', 'city', 'district', 'contact_info', 'status']],
+            height=300
+        )
+
     else:
         st.error(f"CSV file is missing one or more required columns: {', '.join(required_columns)}")
