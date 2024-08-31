@@ -47,8 +47,22 @@ if data is not None:
         # Filter active services
         active_services = data[data['status'].str.contains('active', case=False, na=False)]
 
-        # Search bar for filtering by city, district, organization, category, or services categories
-        search_query = st.text_input("Search by organization, place name, category, city, district, or services categories")
+        # Extract unique districts for the dropdown
+        districts = active_services['district'].unique().tolist()
+
+        # Instructions for the user
+        st.markdown("""
+        **Search Instructions**: You can search by typing the name of an organization or choose a district from the dropdown. 
+        The suggestions in the search box are for districts, but you can manually type in any search term.
+        """)
+
+        # Search bar with districts dropdown
+        search_query = st.text_input("Search by organization or select a district", "")
+        selected_district = st.selectbox("Or select a district from the list", [""] + districts)
+
+        # Combine search criteria
+        if selected_district:
+            search_query = selected_district
 
         # Perform filtering based on search query
         if search_query:
