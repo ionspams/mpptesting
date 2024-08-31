@@ -59,14 +59,30 @@ if uploaded_file is not None:
         # Filter active services
         active_services = data[data['status'].str.contains('active', case=False, na=False)]
 
+        # Search bar for filtering by city, district, organization, category, or services categories
+        search_query = st.text_input("Search by organization, place name, category, city, district, or services categories")
+
+        # Perform filtering based on search query
+        if search_query:
+            filtered_services = active_services[
+                active_services['organization'].str.contains(search_query, case=False, na=False) |
+                active_services['place_name'].str.contains(search_query, case=False, na=False) |
+                active_services['category'].str.contains(search_query, case=False, na=False) |
+                active_services['city'].str.contains(search_query, case=False, na=False) |
+                active_services['district'].str.contains(search_query, case=False, na=False) |
+                active_services['services_categories'].str.contains(search_query, case=False, na=False)
+            ]
+        else:
+            filtered_services = active_services
+
         # Map setup - Display the map first
-        if 'latitude' in active_services.columns and 'longitude' in active_services.columns:
-            # Center the map on the average of the coordinates
-            map_center = [active_services['latitude'].mean(), active_services['longitude'].mean()]
+        if 'latitude' in filtered_services.columns and 'longitude' in filtered_services.columns:
+            # Center the map on the average of the filtered coordinates
+            map_center = [filtered_services['latitude'].mean(), filtered_services['longitude'].mean()]
             service_map = folium.Map(location=map_center, zoom_start=7)
 
-            # Add markers to the map with detailed tooltips
-            for _, row in active_services.iterrows():
+            # Add markers to the map with detailed tooltips based on filtered results
+            for _, row in filtered_services.iterrows():
                 # Handle missing or non-string details gracefully
                 additional_details = str(row.get('service_additional_details', ''))[:50]
                 tooltip_content = (
@@ -89,27 +105,14 @@ if uploaded_file is not None:
         else:
             st.error("CSV file must contain 'latitude' and 'longitude' columns.")
 
-        # Search bar for filtering by city, district, organization, category, or services categories
-        search_query = st.text_input("Search by organization, place name, category, city, district, or services categories")
-
-        if search_query:
-            filtered_services = active_services[
-                active_services['organization'].str.contains(search_query, case=False, na=False) |
-                active_services['place_name'].str.contains(search_query, case=False, na=False) |
-                active_services['category'].str.contains(search_query, case=False, na=False) |
-                active_services['city'].str.contains(search_query, case=False, na=False) |
-                active_services['district'].str.contains(search_query, case=False, na=False) |
-                active_services['services_categories'].str.contains(search_query, case=False, na=False)
-            ]
-            
-            # Display the table only if there are search results, and limit to 5 rows
-            if not filtered_services.empty:
-                st.write("### Services Table (Showing up to 5 results)")
-                st.table(
-                    filtered_services[['organization', 'place_name', 'category', 'services_categories', 'city', 'district', 'status']].head(5)
-                )
-            else:
-                st.warning("No matching services found.")
+        # Display the table only if there are search results, and limit to 5 rows
+        if search_query and not filtered_services.empty:
+            st.write("### Services Table (Showing up to 5 results)")
+            st.table(
+                filtered_services[['organization', 'place_name', 'category', 'services_categories', 'city', 'district', 'status']].head(5)
+            )
+        elif search_query:
+            st.warning("No matching services found.")
 
     else:
         st.error(f"CSV file is missing one or more required columns: {', '.join(required_columns)}")
