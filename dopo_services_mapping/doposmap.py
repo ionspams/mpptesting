@@ -76,12 +76,14 @@ if uploaded_file is not None:
 
             # Add markers to the map with detailed tooltips
             for _, row in active_services.iterrows():
+                # Handle missing or non-string details gracefully
+                additional_details = str(row.get('service_additional_details', ''))[:50]
                 tooltip_content = (
                     f"<b>Place Name:</b> {row['place_name']}<br>"
                     f"<b>Status:</b> {row['status']}<br>"
-                    f"<b>Assistance Criteria:</b> {row['assistance_criteria']}<br>"
-                    f"<b>Service Additional Details:</b> {row['service_additional_details'][:50]}..."  # Truncate long details
-                    f"<br><b>Hotline:</b> {row['pub_hotline']}<br>"
+                    f"<b>Assistance Criteria:</b> {row.get('assistance_criteria', 'N/A')}<br>"
+                    f"<b>Service Additional Details:</b> {additional_details}..."  # Truncate long details
+                    f"<br><b>Hotline:</b> {row.get('pub_hotline', 'N/A')}<br>"
                     f"<b>Organization:</b> {row['organization']}"
                 )
                 folium.Marker(
