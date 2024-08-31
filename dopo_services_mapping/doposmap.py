@@ -63,7 +63,7 @@ if uploaded_file is not None:
         search_query = st.text_input("Search by organization, place name, category, city, district, or services categories")
 
         if search_query:
-            active_services = active_services[
+            filtered_services = active_services[
                 active_services['organization'].str.contains(search_query, case=False, na=False) |
                 active_services['place_name'].str.contains(search_query, case=False, na=False) |
                 active_services['category'].str.contains(search_query, case=False, na=False) |
@@ -71,6 +71,15 @@ if uploaded_file is not None:
                 active_services['district'].str.contains(search_query, case=False, na=False) |
                 active_services['services_categories'].str.contains(search_query, case=False, na=False)
             ]
+            
+            # Display the table only if there are search results
+            if not filtered_services.empty:
+                st.write("### Services Table")
+                st.table(
+                    filtered_services[['organization', 'place_name', 'category', 'services_categories', 'city', 'district', 'status']]
+                )
+            else:
+                st.warning("No matching services found.")
 
         # Map setup - Display the map first
         if 'latitude' in active_services.columns and 'longitude' in active_services.columns:
@@ -101,13 +110,6 @@ if uploaded_file is not None:
             folium_static(service_map)
         else:
             st.error("CSV file must contain 'latitude' and 'longitude' columns.")
-
-        # Display a compact table after the map
-        st.write("### Services Table")
-        # st.table instead of st.dataframe to make it less interactive and not downloadable
-        st.table(
-            active_services[['organization', 'place_name', 'category', 'services_categories', 'city', 'district', 'status']]
-        )
 
     else:
         st.error(f"CSV file is missing one or more required columns: {', '.join(required_columns)}")
