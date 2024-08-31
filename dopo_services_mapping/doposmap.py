@@ -2,6 +2,8 @@ import streamlit as st
 import pandas as pd
 import folium
 from streamlit_folium import folium_static
+import requests
+from io import StringIO
 import base64
 
 # Title of the app
@@ -13,41 +15,27 @@ st.markdown("""
 This is a prototype, and not all parties have agreed to have their contact information displayed.
 """)
 
-# Function to download sample CSV
-def get_table_download_link(df):
-    csv = df.to_csv(index=False)
-    b64 = base64.b64encode(csv.encode()).decode()  # some strings <-> bytes conversions necessary here
-    href = f'<a href="data:file/csv;base64,{b64}" download="sample_services.csv">Download Sample CSV</a>'
-    return href
+# Function to fetch CSV from GitHub
+def fetch_github_csv(repo, path, token):
+    url = f"https://api.github.com/repos/{repo}/contents/{path}"
+    headers = {"Authorization": f"token {token}"}
+    response = requests.get(url, headers=headers)
+    if response.status_code == 200:
+        content = response.json()['content']
+        decoded_content = base64.b64decode(content).decode('utf-8')
+        return pd.read_csv(StringIO(decoded_content))
+    else:
+        st.error("Failed to fetch the dataset from GitHub.")
+        return None
 
-# Sample CSV Data with English headers
-sample_data = pd.DataFrame({
-    'organization': ['CASMED', 'WeWorld Community Center'],
-    'place_name': ['Rural Public Library "Ion Druță"', 'WeWorld Community Center'],
-    'category': ['Education', 'Domestic and Sexual Violence, Protection, Education'],
-    'city': ['Donduşeni', 'Chişinau'],
-    'district': ['Donduşeni', 'Chişinău'],
-    'contact_info': ['casmed.md@gmail.com', 'elena.colesnicova@weworld.it'],  # This won't be displayed for now
-    'status': ['Active until December 2024', 'Active until December 2025'],
-    'latitude': [47.85, 47.01],
-    'longitude': [28.12, 28.84],
-    'assistance_criteria': ['Criteria 1', 'Criteria 2'],
-    'service_additional_details': ['Details 1', 'Details 2'],
-    'pub_hotline': ['+373 67700250', '+373 60949091'],
-    'services_categories': ['Health, Education', 'Protection, Education, Legal']
-})
+# Replace with your own repository details
+repo = "ionspams/m4p_secure"  # Your GitHub username/repository name
+path = "smapping_proto.csv"  # The path to your CSV file within the repo
+token = st.secrets["GITHUB_TOKEN"]  # GitHub token stored securely in Streamlit secrets
 
-# Display sample CSV download link
-st.markdown("If you're having trouble formatting your data, [download this sample CSV file](#).")
-st.markdown(get_table_download_link(sample_data), unsafe_allow_html=True)
-
-# File uploader
-uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
-
-if uploaded_file is not None:
-    # Read the CSV file
-    data = pd.read_csv(uploaded_file)
-
+# Fetch and load the dataset
+data = fetch_github_csv(repo, path, token)
+if data is not None:
     # Check if all required columns are present
     required_columns = [
         'organization', 'place_name', 'category', 'city', 'district', 
