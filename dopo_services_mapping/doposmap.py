@@ -107,11 +107,11 @@ if data is not None:
         else:
             st.error("CSV file must contain 'latitude' and 'longitude' columns.")
 
-        # Display the table only if there are search results, and limit to 5 rows
+        # Display the table only if there are search results, and limit to 3 rows
         if search_query and not filtered_services.empty:
-            st.write("### Services Table (Showing up to 5 results)")
+            st.write("### Services Table (Showing up to 3 results)")
             st.table(
-                filtered_services[['organization', 'place_name', 'category', 'services_categories', 'city', 'district', 'status']].head(5)
+                filtered_services[['organization', 'place_name', 'category', 'services_categories', 'city', 'district', 'status']].head(3)
             )
         elif search_query:
             st.warning("No matching services found.")
