@@ -98,8 +98,14 @@ if data is not None:
         else:
             filtered_services = active_services
 
+        # **Handle missing latitude/longitude values**
+        if filtered_services['latitude'].isna().sum() > 0 or filtered_services['longitude'].isna().sum() > 0:
+            st.warning("Some entries have missing location data and won't be displayed on the map.")
+            # Drop rows where latitude or longitude are NaN
+            filtered_services = filtered_services.dropna(subset=['latitude', 'longitude'])
+
         # Map setup - Display the map first
-        if 'latitude' in filtered_services.columns and 'longitude' in filtered_services.columns:
+        if 'latitude' in filtered_services.columns and 'longitude' in filtered_services.columns and not filtered_services.empty:
             # Center the map on the average of the filtered coordinates
             map_center = [filtered_services['latitude'].mean(), filtered_services['longitude'].mean()]
             service_map = folium.Map(location=map_center, zoom_start=7)
@@ -126,7 +132,7 @@ if data is not None:
             # Display the map
             folium_static(service_map)
         else:
-            st.error("CSV file must contain 'latitude' and 'longitude' columns.")
+            st.error("CSV file must contain valid 'latitude' and 'longitude' columns.")
 
         # Display the table only if there are search results, and limit to 5 rows
         if search_query and not filtered_services.empty:
