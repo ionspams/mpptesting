@@ -43,7 +43,7 @@ if organization == "Dopomoha.md":
     The suggestions in the search box are for districts, but you can manually type in any search term.
     """
 else:
-    path = "pinmapping.csv"
+    path = "pinmapping_cleaned.csv"  # Updated with the cleaned CSV
     st.title("PIN Moldova Services Mapping Prototype")
     disclaimer_text = """
     **Disclaimer:** Contact information is currently not displayed publicly as it is not appropriate at this stage. 
@@ -68,11 +68,11 @@ if data is not None:
     ]
     
     if all(column in data.columns for column in required_columns):
-        # Filter active services
-        active_services = data[data['status'].str.contains('active', case=False, na=False)]
+        # Filter non-empty status rows for active services
+        active_services = data[data['status'].notna()]
 
         # Extract unique districts for the dropdown
-        districts = active_services['district'].unique().tolist()
+        districts = active_services['district'].dropna().unique().tolist()
 
         # Instructions for the user
         st.markdown(search_instruction_text)
@@ -98,7 +98,7 @@ if data is not None:
         else:
             filtered_services = active_services
 
-        # **Handle missing latitude/longitude values**
+        # Handle missing latitude/longitude values
         if filtered_services['latitude'].isna().sum() > 0 or filtered_services['longitude'].isna().sum() > 0:
             st.warning("Some entries have missing location data and won't be displayed on the map.")
             # Drop rows where latitude or longitude are NaN
