@@ -6,15 +6,6 @@ import requests
 from io import StringIO
 import base64
 
-# Title of the app
-st.title("Dopomoha.md Services Mapping Prototype")
-
-# Disclaimer for Contact Info
-st.markdown("""
-**Disclaimer:** Contact information is currently not displayed publicly as it is not appropriate at this stage. 
-This is a prototype, and not all parties have agreed to have their contact information displayed.
-""")
-
 # Function to fetch CSV from GitHub
 def fetch_github_csv(repo, path, token):
     url = f"https://api.github.com/repos/{repo}/contents/{path}"
@@ -28,10 +19,43 @@ def fetch_github_csv(repo, path, token):
         st.error("Failed to fetch the dataset from GitHub.")
         return None
 
-# Replace with your own repository details
+# Sidebar for selecting the organization
+st.sidebar.title("Select Organization")
+organization = st.sidebar.radio(
+    "Choose an organization to view its services:",
+    ("Dopomoha.md", "PIN Moldova")
+)
+
+# GitHub repository and token details
 repo = "ionspams/m4p_secure"  # Your GitHub username/repository name
-path = "smapping_proto.csv"  # The path to your CSV file within the repo
 token = st.secrets["GITHUB_TOKEN"]  # GitHub token stored securely in Streamlit secrets
+
+# Set CSV path and text based on the selected organization
+if organization == "Dopomoha.md":
+    path = "smapping_proto.csv"
+    st.title("Dopomoha.md Services Mapping Prototype")
+    disclaimer_text = """
+    **Disclaimer:** Contact information is currently not displayed publicly as it is not appropriate at this stage. 
+    This is a prototype, and not all parties have agreed to have their contact information displayed.
+    """
+    search_instruction_text = """
+    **Search Instructions**: You can search by typing the name of an organization or choose a district from the dropdown. 
+    The suggestions in the search box are for districts, but you can manually type in any search term.
+    """
+else:
+    path = "pinmapping.csv"
+    st.title("PIN Moldova Services Mapping Prototype")
+    disclaimer_text = """
+    **Disclaimer:** Contact information is currently not displayed publicly as it is not appropriate at this stage. 
+    This is a prototype, representing People in Need Moldova (PIN Moldova) services.
+    """
+    search_instruction_text = """
+    **Search Instructions**: You can search by typing the name of an organization or choose a district from the dropdown. 
+    The suggestions in the search box are for districts, but you can manually type in any search term.
+    """
+
+# Display the disclaimer
+st.markdown(disclaimer_text)
 
 # Fetch and load the dataset
 data = fetch_github_csv(repo, path, token)
@@ -51,10 +75,7 @@ if data is not None:
         districts = active_services['district'].unique().tolist()
 
         # Instructions for the user
-        st.markdown("""
-        **Search Instructions**: You can search by typing the name of an organization or choose a district from the dropdown. 
-        The suggestions in the search box are for districts, but you can manually type in any search term.
-        """)
+        st.markdown(search_instruction_text)
 
         # Search bar with districts dropdown
         search_query = st.text_input("Search by organization or select a district", "")
@@ -107,11 +128,11 @@ if data is not None:
         else:
             st.error("CSV file must contain 'latitude' and 'longitude' columns.")
 
-        # Display the table only if there are search results, and limit to 3 rows
+        # Display the table only if there are search results, and limit to 5 rows
         if search_query and not filtered_services.empty:
-            st.write("### Services Table (Showing up to 3 results)")
+            st.write("### Services Table (Showing up to 5 results)")
             st.table(
-                filtered_services[['organization', 'place_name', 'category', 'services_categories', 'city', 'district', 'status']].head(3)
+                filtered_services[['organization', 'place_name', 'category', 'services_categories', 'city', 'district', 'status']].head(5)
             )
         elif search_query:
             st.warning("No matching services found.")
