@@ -118,7 +118,7 @@ def main():
             download_links = {}
 
             # Fill and save Statut
-            statut_template = os.path.join(TEMPLATE_FOLDER, "Statut_template.doc")
+            statut_template = os.path.join(TEMPLATE_FOLDER, "Statut_template.docx")
             statut_doc = fill_template(statut_template, placeholders)
             statut_filename = f"{st.session_state.organization_name}_Statut.docx"
             statut_saved = save_document(statut_doc, statut_filename)
@@ -126,7 +126,7 @@ def main():
                 download_links["Statut"] = statut_saved
 
             # Fill and save Proces Verbal
-            proces_verbal_template = os.path.join(TEMPLATE_FOLDER, "Proces_verbal_template.doc")
+            proces_verbal_template = os.path.join(TEMPLATE_FOLDER, "Proces_verbal_template.docx")
             proces_verbal_doc = fill_template(proces_verbal_template, placeholders)
             proces_verbal_filename = f"{st.session_state.organization_name}_Proces_Verbal.docx"
             proces_verbal_saved = save_document(proces_verbal_doc, proces_verbal_filename)
@@ -145,7 +145,8 @@ def main():
             if download_links:
                 st.success("Documents generated successfully!")
                 for doc_name, file_name in download_links.items():
-                    st.markdown(f"**Download {doc_name}:** [Download {doc_name}]({file_name})")
+                    with open(file_name, "rb") as file:
+                        st.download_button(f"Download {doc_name}", file, file_name=file_name)
             else:
                 st.error("No documents could be generated. Please check the templates and try again.")
 
