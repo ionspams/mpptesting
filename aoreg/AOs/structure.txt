@@ -1,5 +1,0 @@
-AOS/
-    Statut_template.docx
-    Proces_verbal_template.docx
-    Registration_form.docx
-    Beneficiary_declaration.docx
