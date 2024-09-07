@@ -9,18 +9,29 @@ translator = Translator()
 # Define the folder where your templates are stored
 TEMPLATE_FOLDER = "AOS"
 
+# Helper function to check if the file exists
+def check_file_exists(file_path):
+    return os.path.exists(file_path)
+
 # Helper function to fill templates
 def fill_template(template_path, placeholders):
-    doc = Document(template_path)
-    for para in doc.paragraphs:
-        for key, value in placeholders.items():
-            if key in para.text:
-                para.text = para.text.replace(key, value)
-    return doc
+    if check_file_exists(template_path):
+        doc = Document(template_path)
+        for para in doc.paragraphs:
+            for key, value in placeholders.items():
+                if key in para.text:
+                    para.text = para.text.replace(key, value)
+        return doc
+    else:
+        st.error(f"Template file not found: {template_path}")
+        return None
 
 # Helper function to save document
 def save_document(doc, filename):
-    doc.save(filename)
+    if doc:
+        doc.save(filename)
+    else:
+        st.error("Document not saved because the template could not be loaded.")
 
 # Main Streamlit app
 def main():
@@ -88,10 +99,11 @@ def main():
             save_document(registration_form_doc, registration_form_filename)
 
             # Provide download links
-            st.success("Documents generated successfully!")
-            st.download_button("Download Statut", open(statut_filename, "rb"), file_name=statut_filename)
-            st.download_button("Download Proces Verbal", open(proces_verbal_filename, "rb"), file_name=proces_verbal_filename)
-            st.download_button("Download Registration Form", open(registration_form_filename, "rb"), file_name=registration_form_filename)
+            if statut_doc and proces_verbal_doc and registration_form_doc:
+                st.success("Documents generated successfully!")
+                st.download_button("Download Statut", open(statut_filename, "rb"), file_name=statut_filename)
+                st.download_button("Download Proces Verbal", open(proces_verbal_filename, "rb"), file_name=proces_verbal_filename)
+                st.download_button("Download Registration Form", open(registration_form_filename, "rb"), file_name=registration_form_filename)
 
     elif workflow == "Manual Excerpt Generation":
         st.subheader("Provide Details for Manual Excerpt Generation")
