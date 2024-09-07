@@ -22,7 +22,10 @@ def authenticate_google():
     if google_creds_json:
         google_creds_dict = json.loads(google_creds_json)
         flow = InstalledAppFlow.from_client_config(google_creds_dict, SCOPES)
-        creds = flow.run_local_server(port=0)
+        
+        # Use run_console instead of run_local_server for cloud-based environments
+        creds = flow.run_console()
+
     else:
         st.error("Google credentials not found in environment variables.")
     
