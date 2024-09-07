@@ -55,21 +55,33 @@ def main():
     if workflow == "Full Document Generation":
         st.subheader("Provide Details for Full Document Generation")
 
-        # Pre-fill inputs with previous values from session state
+        # Section 1: Statut Form Inputs
+        st.header("Section 1: Statut Information")
+        
         organization_name = st.text_input("Complete name of the organization", value=st.session_state.organization_name)
         short_name = st.text_input("Short name (if applicable)")
-        goal1 = st.text_area("Goal 1 (user-specific)")
-        goal2 = st.text_area("Goal 2 (optional)")
-        sco = st.text_input("SCO (small letters)")
+        goal1 = st.text_area("Goal 1")
+        goal2 = st.text_area("Goal 2")
+        sco = st.text_input("SCO")
         mandate = st.text_input("Mandate")
         gadays = st.text_input("General Assembly Days (GADAYS)")
         egadays = st.text_input("Extraordinary General Assembly Days (EGADAYS)")
-        right_holders = st.text_input("Right Holders (small letters)")
+        right_holders = st.text_input("Right Holders")
         founder1 = st.text_input("Founder 1")
         founder2 = st.text_input("Founder 2")
         founder3 = st.text_input("Founder 3")
+
+        st.divider()  # Separation between sections
+
+        # Section 2: Proces Verbal Inputs
+        st.header("Section 2: Proces Verbal Information")
         governance = st.text_area("Governance details (board members, terms, administrator)")
         contact_info = st.text_input("Contact Information (address, email, phone)")
+
+        st.divider()
+
+        # Section 3: Registration Form Inputs
+        st.header("Section 3: Registration Form Information")
         sediu = st.text_input("Sediu (official address of the organization)")
 
         # Update session state when inputs change
