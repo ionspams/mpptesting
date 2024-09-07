@@ -82,17 +82,17 @@ def main():
 
         # Generate documents
         if st.button("Generate Documents"):
-            # Define placeholders
+            # Define placeholders using double curly braces
             placeholders = {
-                "[ORGANIZATION_NAME]": organization_name,
-                "[SHORT_NAME]": short_name,
-                "[OBJECTIVES]": objectives,
-                "[VALUES]": values,
-                "[HISTORY]": history,
-                "[FOUNDERS]": founders,
-                "[GOVERNANCE]": governance,
-                "[CONTACT_INFO]": contact_info,
-                "[SEDIU]": sediu
+                "{{organization_name}}": organization_name,
+                "{{short_name}}": short_name,
+                "{{objectives}}": objectives,
+                "{{values}}": values,
+                "{{history}}": history,
+                "{{founders}}": founders,
+                "{{governance}}": governance,
+                "{{contact_info}}": contact_info,
+                "{{sediu}}": sediu
             }
 
             # Reset session state for generated files
