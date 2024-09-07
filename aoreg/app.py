@@ -64,9 +64,9 @@ def main():
         goal2 = st.text_input("Goal 2")
         ceo = st.text_input("CEO (Chief Executive Officer)")
         mandate = st.text_input("Mandate")
-        gadays = st.text_input("General Assembly Days (GADAYS)")
-        egadays = st.text_input("Extraordinary General Assembly Days (EGADAYS)")
-        right_holders = st.text_input("Right Holders (no spaces)")
+        gadays = st.text_input("General Assembly Days (gadays)")
+        egadays = st.text_input("Extraordinary General Assembly Days (egadays)")
+        rightholders = st.text_input("Right Holders (no spaces)")
         founder1 = st.text_input("Founder 1")
         founder2 = st.text_input("Founder 2")
         founder3 = st.text_input("Founder 3")
@@ -97,7 +97,7 @@ def main():
             mandate = translator.translate(mandate, dest='ro').text
             gadays = translator.translate(gadays, dest='ro').text
             egadays = translator.translate(egadays, dest='ro').text
-            right_holders = translator.translate(right_holders, dest='ro').text
+            rightholders = translator.translate(rightholders, dest='ro').text
             founder1 = translator.translate(founder1, dest='ro').text
             founder2 = translator.translate(founder2, dest='ro').text
             founder3 = translator.translate(founder3, dest='ro').text
@@ -115,9 +115,9 @@ def main():
                 "{{goal2}}": goal2,
                 "{{ceo}}": ceo,
                 "{{mandate}}": mandate,
-                "{{GADAYS}}": gadays,
-                "{{EGADAYS}}": egadays,
-                "{{right_holders}}": right_holders,
+                "{{gadays}}": gadays,
+                "{{egadays}}": egadays,
+                "{{rightholders}}": rightholders,
                 "{{founder1}}": founder1,
                 "{{founder2}}": founder2,
                 "{{founder3}}": founder3,
