@@ -58,10 +58,16 @@ def main():
         # Pre-fill inputs with previous values from session state
         organization_name = st.text_input("Complete name of the organization", value=st.session_state.organization_name)
         short_name = st.text_input("Short name (if applicable)")
-        objectives = st.text_area("Objectives, Mission, Vision (user-specific)")
-        values = st.text_area("Values and Principles (optional)")
-        history = st.text_area("History or 'About the organization' (if applicable)")
-        founders = st.text_area("List of founders (name, IDNP, domicile)")
+        goal1 = st.text_area("Goal 1 (user-specific)")
+        goal2 = st.text_area("Goal 2 (optional)")
+        sco = st.text_input("SCO (small letters)")
+        mandate = st.text_input("Mandate")
+        gadays = st.text_input("General Assembly Days (GADAYS)")
+        egadays = st.text_input("Extraordinary General Assembly Days (EGADAYS)")
+        right_holders = st.text_input("Right Holders (small letters)")
+        founder1 = st.text_input("Founder 1")
+        founder2 = st.text_input("Founder 2")
+        founder3 = st.text_input("Founder 3")
         governance = st.text_area("Governance details (board members, terms, administrator)")
         contact_info = st.text_input("Contact Information (address, email, phone)")
         sediu = st.text_input("Sediu (official address of the organization)")
@@ -72,10 +78,16 @@ def main():
         # Translate inputs to Romanian if necessary
         if st.checkbox("Translate from English to Romanian"):
             organization_name = translator.translate(organization_name, dest='ro').text
-            objectives = translator.translate(objectives, dest='ro').text
-            values = translator.translate(values, dest='ro').text
-            history = translator.translate(history, dest='ro').text
-            founders = translator.translate(founders, dest='ro').text
+            goal1 = translator.translate(goal1, dest='ro').text
+            goal2 = translator.translate(goal2, dest='ro').text
+            sco = translator.translate(sco, dest='ro').text
+            mandate = translator.translate(mandate, dest='ro').text
+            gadays = translator.translate(gadays, dest='ro').text
+            egadays = translator.translate(egadays, dest='ro').text
+            right_holders = translator.translate(right_holders, dest='ro').text
+            founder1 = translator.translate(founder1, dest='ro').text
+            founder2 = translator.translate(founder2, dest='ro').text
+            founder3 = translator.translate(founder3, dest='ro').text
             governance = translator.translate(governance, dest='ro').text
             contact_info = translator.translate(contact_info, dest='ro').text
             sediu = translator.translate(sediu, dest='ro').text
@@ -86,10 +98,16 @@ def main():
             placeholders = {
                 "{{organization_name}}": organization_name,
                 "{{short_name}}": short_name,
-                "{{objectives}}": objectives,
-                "{{values}}": values,
-                "{{history}}": history,
-                "{{founders}}": founders,
+                "{{goal1}}": goal1,
+                "{{goal2}}": goal2,
+                "{{sco}}": sco,
+                "{{mandate}}": mandate,
+                "{{GADAYS}}": gadays,
+                "{{EGADAYS}}": egadays,
+                "{{right_holders}}": right_holders,
+                "{{founder1}}": founder1,
+                "{{founder2}}": founder2,
+                "{{founder3}}": founder3,
                 "{{governance}}": governance,
                 "{{contact_info}}": contact_info,
                 "{{sediu}}": sediu
@@ -136,7 +154,7 @@ def main():
 
         # Pre-fill inputs with previous values from session state
         organization_name = st.text_input("Complete name of the organization", value=st.session_state.organization_name)
-        objectives = st.text_area("Objectives, Mission, Vision (user-specific)")
+        goal1 = st.text_area("Goal 1 (user-specific)")
         governance = st.text_area("Governance details (board members, terms, administrator)")
 
         # Update session state when inputs change
@@ -144,8 +162,8 @@ def main():
 
         if st.button("Generate Excerpts"):
             # Generate text excerpts with placeholders
-            statut_excerpt = f"Obiectivele organizației: {objectives}\nConducerea organizației: {governance}"
-            proces_verbal_excerpt = f"Fondatori: {organization_name}\nDecizii de guvernare: {governance}"
+            statut_excerpt = f"Goal 1: {goal1}\nGovernance: {governance}"
+            proces_verbal_excerpt = f"Founders: {organization_name}\nGovernance: {governance}"
 
             # Display excerpts and provide copy functionality
             st.text_area("Excerpt for Statut", value=statut_excerpt)
