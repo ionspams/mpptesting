@@ -26,12 +26,14 @@ def fill_template(template_path, placeholders):
         st.error(f"Template file not found: {template_path}")
         return None
 
-# Helper function to save document
+# Helper function to save document and check if successful
 def save_document(doc, filename):
     if doc:
         doc.save(filename)
+        return filename
     else:
         st.error("Document not saved because the template could not be loaded.")
+        return None
 
 # Main Streamlit app
 def main():
@@ -80,30 +82,40 @@ def main():
                 "[SEDIU]": sediu
             }
 
+            # Store download links
+            download_links = {}
+
             # Fill and save Statut
             statut_template = os.path.join(TEMPLATE_FOLDER, "Statut_template.doc")
             statut_doc = fill_template(statut_template, placeholders)
             statut_filename = f"{organization_name}_Statut.docx"
-            save_document(statut_doc, statut_filename)
+            statut_saved = save_document(statut_doc, statut_filename)
+            if statut_saved:
+                download_links["Statut"] = statut_saved
 
             # Fill and save Proces Verbal
             proces_verbal_template = os.path.join(TEMPLATE_FOLDER, "Proces_verbal_template.doc")
             proces_verbal_doc = fill_template(proces_verbal_template, placeholders)
             proces_verbal_filename = f"{organization_name}_Proces_Verbal.docx"
-            save_document(proces_verbal_doc, proces_verbal_filename)
+            proces_verbal_saved = save_document(proces_verbal_doc, proces_verbal_filename)
+            if proces_verbal_saved:
+                download_links["Proces Verbal"] = proces_verbal_saved
 
             # Fill and save Registration Form
             registration_form_template = os.path.join(TEMPLATE_FOLDER, "Registration_form.docx")
             registration_form_doc = fill_template(registration_form_template, placeholders)
             registration_form_filename = f"{organization_name}_Registration_Form.docx"
-            save_document(registration_form_doc, registration_form_filename)
+            registration_form_saved = save_document(registration_form_doc, registration_form_filename)
+            if registration_form_saved:
+                download_links["Registration Form"] = registration_form_saved
 
-            # Provide download links
-            if statut_doc and proces_verbal_doc and registration_form_doc:
+            # Show download links for successfully generated documents
+            if download_links:
                 st.success("Documents generated successfully!")
-                st.download_button("Download Statut", open(statut_filename, "rb"), file_name=statut_filename)
-                st.download_button("Download Proces Verbal", open(proces_verbal_filename, "rb"), file_name=proces_verbal_filename)
-                st.download_button("Download Registration Form", open(registration_form_filename, "rb"), file_name=registration_form_filename)
+                for doc_name, file_name in download_links.items():
+                    st.markdown(f"**Download {doc_name}:** [Download {doc_name}]({file_name})")
+            else:
+                st.error("No documents could be generated. Please check the templates and try again.")
 
     elif workflow == "Manual Excerpt Generation":
         st.subheader("Provide Details for Manual Excerpt Generation")
