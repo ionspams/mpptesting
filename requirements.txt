@@ -12,3 +12,5 @@ Pillow==10.0.0
 segno==1.4.0
 folium
 streamlit-folium
+python-docx
+googletrans==4.0.0-rc1
