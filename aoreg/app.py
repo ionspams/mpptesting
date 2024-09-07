@@ -7,7 +7,7 @@ from googletrans import Translator
 translator = Translator()
 
 # Define the folder where your templates are stored
-TEMPLATE_FOLDER = "AOS"
+TEMPLATE_FOLDER = "aoreg/AOS"
 
 # Helper function to check if the file exists
 def check_file_exists(file_path):
