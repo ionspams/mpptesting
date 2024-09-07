@@ -81,15 +81,15 @@ def main():
             }
 
             # Fill and save Statut
-            statut_template = os.path.join(TEMPLATE_FOLDER, "Statut_template.docx")
+            statut_template = os.path.join(TEMPLATE_FOLDER, "Statut_template.doc")
             statut_doc = fill_template(statut_template, placeholders)
-            statut_filename = f"{organization_name}_Statut.docx"
+            statut_filename = f"{organization_name}_Statut.doc"
             save_document(statut_doc, statut_filename)
 
             # Fill and save Proces Verbal
-            proces_verbal_template = os.path.join(TEMPLATE_FOLDER, "Proces_verbal_template.docx")
+            proces_verbal_template = os.path.join(TEMPLATE_FOLDER, "Proces_verbal_template.doc")
             proces_verbal_doc = fill_template(proces_verbal_template, placeholders)
-            proces_verbal_filename = f"{organization_name}_Proces_Verbal.docx"
+            proces_verbal_filename = f"{organization_name}_Proces_Verbal.doc"
             save_document(proces_verbal_doc, proces_verbal_filename)
 
             # Fill and save Registration Form
