@@ -35,23 +35,12 @@ def save_document(doc, filename):
         st.error("Document not saved because the template could not be loaded.")
         return None
 
-# Initialize session state for user inputs
+# Initialize session state for user inputs and file paths
 def initialize_session_state():
-    default_values = {
-        'organization_name': '',
-        'short_name': '',
-        'objectives': '',
-        'values': '',
-        'history': '',
-        'founders': '',
-        'governance': '',
-        'contact_info': '',
-        'sediu': ''
-    }
-
-    for key, default_value in default_values.items():
-        if key not in st.session_state:
-            st.session_state[key] = default_value
+    if 'organization_name' not in st.session_state:
+        st.session_state['organization_name'] = ''
+    if 'generated_files' not in st.session_state:
+        st.session_state['generated_files'] = {}
 
 # Main Streamlit app
 def main():
@@ -68,105 +57,95 @@ def main():
 
         # Pre-fill inputs with previous values from session state
         organization_name = st.text_input("Complete name of the organization", value=st.session_state.organization_name)
-        short_name = st.text_input("Short name (if applicable)", value=st.session_state.short_name)
-        objectives = st.text_area("Objectives, Mission, Vision (user-specific)", value=st.session_state.objectives)
-        values = st.text_area("Values and Principles (optional)", value=st.session_state.values)
-        history = st.text_area("History or 'About the organization' (if applicable)", value=st.session_state.history)
-        founders = st.text_area("List of founders (name, IDNP, domicile)", value=st.session_state.founders)
-        governance = st.text_area("Governance details (board members, terms, administrator)", value=st.session_state.governance)
-        contact_info = st.text_input("Contact Information (address, email, phone)", value=st.session_state.contact_info)
-        sediu = st.text_input("Sediu (official address of the organization)", value=st.session_state.sediu)
+        short_name = st.text_input("Short name (if applicable)")
+        objectives = st.text_area("Objectives, Mission, Vision (user-specific)")
+        values = st.text_area("Values and Principles (optional)")
+        history = st.text_area("History or 'About the organization' (if applicable)")
+        founders = st.text_area("List of founders (name, IDNP, domicile)")
+        governance = st.text_area("Governance details (board members, terms, administrator)")
+        contact_info = st.text_input("Contact Information (address, email, phone)")
+        sediu = st.text_input("Sediu (official address of the organization)")
 
         # Update session state when inputs change
         st.session_state.organization_name = organization_name
-        st.session_state.short_name = short_name
-        st.session_state.objectives = objectives
-        st.session_state.values = values
-        st.session_state.history = history
-        st.session_state.founders = founders
-        st.session_state.governance = governance
-        st.session_state.contact_info = contact_info
-        st.session_state.sediu = sediu
 
         # Translate inputs to Romanian if necessary
         if st.checkbox("Translate from English to Romanian"):
-            st.session_state.organization_name = translator.translate(st.session_state.organization_name, dest='ro').text
-            st.session_state.objectives = translator.translate(st.session_state.objectives, dest='ro').text
-            st.session_state.values = translator.translate(st.session_state.values, dest='ro').text
-            st.session_state.history = translator.translate(st.session_state.history, dest='ro').text
-            st.session_state.founders = translator.translate(st.session_state.founders, dest='ro').text
-            st.session_state.governance = translator.translate(st.session_state.governance, dest='ro').text
-            st.session_state.contact_info = translator.translate(st.session_state.contact_info, dest='ro').text
-            st.session_state.sediu = translator.translate(st.session_state.sediu, dest='ro').text
+            organization_name = translator.translate(organization_name, dest='ro').text
+            objectives = translator.translate(objectives, dest='ro').text
+            values = translator.translate(values, dest='ro').text
+            history = translator.translate(history, dest='ro').text
+            founders = translator.translate(founders, dest='ro').text
+            governance = translator.translate(governance, dest='ro').text
+            contact_info = translator.translate(contact_info, dest='ro').text
+            sediu = translator.translate(sediu, dest='ro').text
 
         # Generate documents
         if st.button("Generate Documents"):
             # Define placeholders
             placeholders = {
-                "[ORGANIZATION_NAME]": st.session_state.organization_name,
-                "[SHORT_NAME]": st.session_state.short_name,
-                "[OBJECTIVES]": st.session_state.objectives,
-                "[VALUES]": st.session_state.values,
-                "[HISTORY]": st.session_state.history,
-                "[FOUNDERS]": st.session_state.founders,
-                "[GOVERNANCE]": st.session_state.governance,
-                "[CONTACT_INFO]": st.session_state.contact_info,
-                "[SEDIU]": st.session_state.sediu
+                "[ORGANIZATION_NAME]": organization_name,
+                "[SHORT_NAME]": short_name,
+                "[OBJECTIVES]": objectives,
+                "[VALUES]": values,
+                "[HISTORY]": history,
+                "[FOUNDERS]": founders,
+                "[GOVERNANCE]": governance,
+                "[CONTACT_INFO]": contact_info,
+                "[SEDIU]": sediu
             }
 
-            # Store download links
-            download_links = {}
+            # Reset session state for generated files
+            st.session_state['generated_files'] = {}
 
             # Fill and save Statut
             statut_template = os.path.join(TEMPLATE_FOLDER, "Statut_template.docx")
             statut_doc = fill_template(statut_template, placeholders)
-            statut_filename = f"{st.session_state.organization_name}_Statut.docx"
+            statut_filename = f"{organization_name}_Statut.docx"
             statut_saved = save_document(statut_doc, statut_filename)
             if statut_saved:
-                download_links["Statut"] = statut_saved
+                st.session_state['generated_files']["Statut"] = statut_saved
 
             # Fill and save Proces Verbal
             proces_verbal_template = os.path.join(TEMPLATE_FOLDER, "Proces_verbal_template.docx")
             proces_verbal_doc = fill_template(proces_verbal_template, placeholders)
-            proces_verbal_filename = f"{st.session_state.organization_name}_Proces_Verbal.docx"
+            proces_verbal_filename = f"{organization_name}_Proces_Verbal.docx"
             proces_verbal_saved = save_document(proces_verbal_doc, proces_verbal_filename)
             if proces_verbal_saved:
-                download_links["Proces Verbal"] = proces_verbal_saved
+                st.session_state['generated_files']["Proces Verbal"] = proces_verbal_saved
 
             # Fill and save Registration Form
             registration_form_template = os.path.join(TEMPLATE_FOLDER, "Registration_form.docx")
             registration_form_doc = fill_template(registration_form_template, placeholders)
-            registration_form_filename = f"{st.session_state.organization_name}_Registration_Form.docx"
+            registration_form_filename = f"{organization_name}_Registration_Form.docx"
             registration_form_saved = save_document(registration_form_doc, registration_form_filename)
             if registration_form_saved:
-                download_links["Registration Form"] = registration_form_saved
+                st.session_state['generated_files']["Registration Form"] = registration_form_saved
 
-            # Show download links for successfully generated documents
-            if download_links:
-                st.success("Documents generated successfully!")
-                for doc_name, file_name in download_links.items():
-                    with open(file_name, "rb") as file:
-                        st.download_button(f"Download {doc_name}", file, file_name=file_name)
-            else:
-                st.error("No documents could be generated. Please check the templates and try again.")
+        # Display download buttons for all generated files
+        if st.session_state['generated_files']:
+            st.success("Documents generated successfully!")
+            for doc_name, file_name in st.session_state['generated_files'].items():
+                with open(file_name, "rb") as file:
+                    st.download_button(f"Download {doc_name}", file, file_name=file_name)
+        else:
+            st.error("No documents could be generated. Please check the templates and try again.")
 
     elif workflow == "Manual Excerpt Generation":
         st.subheader("Provide Details for Manual Excerpt Generation")
 
         # Pre-fill inputs with previous values from session state
         organization_name = st.text_input("Complete name of the organization", value=st.session_state.organization_name)
-        objectives = st.text_area("Objectives, Mission, Vision (user-specific)", value=st.session_state.objectives)
-        governance = st.text_area("Governance details (board members, terms, administrator)", value=st.session_state.governance)
+        objectives = st.text_area("Objectives, Mission, Vision (user-specific)")
+        governance = st.text_area("Governance details (board members, terms, administrator)")
 
         # Update session state when inputs change
         st.session_state.organization_name = organization_name
-        st.session_state.objectives = objectives
-        st.session_state.governance = governance
 
         if st.button("Generate Excerpts"):
             # Generate text excerpts with placeholders
-            statut_excerpt = f"Obiectivele organizației: {st.session_state.objectives}\nConducerea organizației: {st.session_state.governance}"
-            proces_verbal_excerpt = f"Fondatori: {st.session_state.organization_name}\nDecizii de guvernare: {st.session_state.governance}"
+            statut_excerpt = f"Obiectivele organizației: {objectives}\nConducerea organizației: {governance}"
+            proces_verbal_excerpt = f"Fondatori: {organization_name}\nDecizii de guvernare: {governance}"
 
             # Display excerpts and provide copy functionality
             st.text_area("Excerpt for Statut", value=statut_excerpt)
