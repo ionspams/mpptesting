@@ -14,3 +14,8 @@ folium
 streamlit-folium
 python-docx
 googletrans==4.0.0-rc1
+google-auth
+google-auth-oauthlib
+google-auth-httplib2
+google-api-python-client
+reportlab
