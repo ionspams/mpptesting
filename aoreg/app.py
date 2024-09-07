@@ -55,32 +55,32 @@ def main():
     if workflow == "Full Document Generation":
         st.subheader("Provide Details for Full Document Generation")
 
-        # Section 1: Statut Form Inputs
+        # Section 1: Statut Form Inputs (all placeholders as text inputs)
         st.header("Section 1: Statut Information")
-        
+
         organization_name = st.text_input("Complete name of the organization", value=st.session_state.organization_name)
         short_name = st.text_input("Short name (if applicable)")
-        goal1 = st.text_area("Goal 1")
-        goal2 = st.text_area("Goal 2")
-        sco = st.text_input("SCO")
+        goal1 = st.text_input("Goal 1")
+        goal2 = st.text_input("Goal 2")
+        ceo = st.text_input("CEO (Chief Executive Officer)")
         mandate = st.text_input("Mandate")
         gadays = st.text_input("General Assembly Days (GADAYS)")
         egadays = st.text_input("Extraordinary General Assembly Days (EGADAYS)")
-        right_holders = st.text_input("Right Holders")
+        right_holders = st.text_input("Right Holders (no spaces)")
         founder1 = st.text_input("Founder 1")
         founder2 = st.text_input("Founder 2")
         founder3 = st.text_input("Founder 3")
 
         st.divider()  # Separation between sections
 
-        # Section 2: Proces Verbal Inputs
+        # Section 2: Proces Verbal Inputs (individual text inputs)
         st.header("Section 2: Proces Verbal Information")
-        governance = st.text_area("Governance details (board members, terms, administrator)")
+        governance = st.text_input("Governance details (board members, terms, administrator)")
         contact_info = st.text_input("Contact Information (address, email, phone)")
 
         st.divider()
 
-        # Section 3: Registration Form Inputs
+        # Section 3: Registration Form Inputs (individual text input)
         st.header("Section 3: Registration Form Information")
         sediu = st.text_input("Sediu (official address of the organization)")
 
@@ -90,9 +90,10 @@ def main():
         # Translate inputs to Romanian if necessary
         if st.checkbox("Translate from English to Romanian"):
             organization_name = translator.translate(organization_name, dest='ro').text
+            short_name = translator.translate(short_name, dest='ro').text
             goal1 = translator.translate(goal1, dest='ro').text
             goal2 = translator.translate(goal2, dest='ro').text
-            sco = translator.translate(sco, dest='ro').text
+            ceo = translator.translate(ceo, dest='ro').text
             mandate = translator.translate(mandate, dest='ro').text
             gadays = translator.translate(gadays, dest='ro').text
             egadays = translator.translate(egadays, dest='ro').text
@@ -112,7 +113,7 @@ def main():
                 "{{short_name}}": short_name,
                 "{{goal1}}": goal1,
                 "{{goal2}}": goal2,
-                "{{sco}}": sco,
+                "{{ceo}}": ceo,
                 "{{mandate}}": mandate,
                 "{{GADAYS}}": gadays,
                 "{{EGADAYS}}": egadays,
@@ -166,8 +167,8 @@ def main():
 
         # Pre-fill inputs with previous values from session state
         organization_name = st.text_input("Complete name of the organization", value=st.session_state.organization_name)
-        goal1 = st.text_area("Goal 1 (user-specific)")
-        governance = st.text_area("Governance details (board members, terms, administrator)")
+        goal1 = st.text_input("Goal 1")
+        governance = st.text_input("Governance details (board members, terms, administrator)")
 
         # Update session state when inputs change
         st.session_state.organization_name = organization_name
