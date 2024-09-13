@@ -89,6 +89,7 @@ if st.session_state.step == 1:
         st.session_state.selected_order = orders_df[orders_df['ticket_id'] == selected_ticket].iloc[0]
         st.session_state.step = 2
         st.experimental_rerun()
+        st.stop()  # Prevent further execution
 
 # Step 2: Input Beneficiary Information
 elif st.session_state.step == 2:
@@ -99,6 +100,7 @@ elif st.session_state.step == 2:
         st.error("No order found. Please go back to the previous step.")
         st.session_state.step = 1
         st.experimental_rerun()
+        st.stop()  # Prevent further execution
     else:
         st.write(f"**Contact Person:** {order['contact_person']}")
         st.write(f"**Phone Number:** {order['phone_number']}")
@@ -119,6 +121,7 @@ elif st.session_state.step == 2:
                 st.session_state.documents_input = passports_entered
                 st.session_state.step = 3
                 st.experimental_rerun()
+                st.stop()  # Prevent further execution
         else:
             st.warning(f"Please enter exactly {order['family_size']} passport numbers.")
 
@@ -134,6 +137,7 @@ elif st.session_state.step == 3:
         st.error("No order found. Please go back to the previous step.")
         st.session_state.step = 1
         st.experimental_rerun()
+        st.stop()  # Prevent further execution
     else:
         # Get current date and time without seconds
         current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M")
@@ -174,6 +178,7 @@ elif st.session_state.step == 3:
                 st.session_state.signature = canvas_result.image_data
                 st.session_state.step = 4
                 st.experimental_rerun()
+                st.stop()  # Prevent further execution
             else:
                 st.warning("Please provide a signature.")
 
@@ -206,9 +211,12 @@ elif st.session_state.step == 4:
         st.error("No signature found. Please go back and provide a signature.")
         st.session_state.step = 3
         st.experimental_rerun()
+        st.stop()  # Prevent further execution
 
     if st.button("Start Over"):
         st.session_state.step = 1
         st.session_state.selected_order = None
         st.session_state.documents_input = []
+        st.session_state.signature = None
         st.experimental_rerun()
+        st.stop()  # Prevent further execution
