@@ -4,7 +4,9 @@ from PIL import Image, ImageDraw, ImageFont
 import pandas as pd
 import io
 import numpy as np  # Added for array manipulations
-from streamlit_drawable_canvas import st_canvas  # Import st_canvas
+
+# Import st_canvas correctly
+from streamlit_drawable_canvas import st_canvas
 
 # Set page configuration
 st.set_page_config(page_title="Pomoha Warehouse Distribution", page_icon="📦", layout="centered")
@@ -109,6 +111,9 @@ elif st.session_state.step == 3:
     st.header("Step 3: Capture Signature")
 
     st.write("Please sign below:")
+
+    # Debugging: Check the type of st_canvas
+    st.write(f"Type of st_canvas: {type(st_canvas)}")  # Should output <class 'function'>
 
     # Create a canvas component
     canvas_result = st_canvas(
