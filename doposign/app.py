@@ -3,6 +3,8 @@ from datetime import datetime
 from PIL import Image, ImageDraw, ImageFont
 import pandas as pd
 import io
+import numpy as np  # Added for array manipulations
+from streamlit_drawable_canvas import st_canvas  # Import st_canvas
 
 # Set page configuration
 st.set_page_config(page_title="Pomoha Warehouse Distribution", page_icon="📦", layout="centered")
@@ -29,7 +31,6 @@ orders_data = [
         'products': ['Product 1', 'Product 2'],
         'documents_required': 2
     },
-    # Add 9 more orders
     {
         'ticket_id': 'TICKET002',
         'phone_number': '+0987654321',
@@ -38,7 +39,7 @@ orders_data = [
         'products': ['Product 3', 'Product 4'],
         'documents_required': 1
     },
-    # ... (add more orders as needed)
+    # Additional orders
 ]
 
 # Simulate 10 orders
@@ -109,11 +110,9 @@ elif st.session_state.step == 3:
 
     st.write("Please sign below:")
 
-    # Create a canvas for signature
-    from streamlit_drawable_canvas import st_canvas
-
+    # Create a canvas component
     canvas_result = st_canvas(
-        fill_color="rgba(255, 165, 0, 0.3)",  # Fixed fill color with some opacity
+        fill_color="rgba(255, 165, 0, 0.3)",
         stroke_width=2,
         stroke_color="#000000",
         background_color="#FFFFFF",
@@ -148,21 +147,26 @@ elif st.session_state.step == 4:
         f"Products: {', '.join(order['products'])}"
     )
 
-    # Create an image from the signature data
-    signature_image = Image.fromarray(st.session_state.signature.astype('uint8'), 'RGBA')
+    # Convert the signature image data to a PIL Image
+    signature_array = st.session_state.signature
+    signature_image = Image.fromarray((signature_array * 255).astype('uint8'), mode="RGBA")
 
-    # Add watermark to the signature image
-    draw = ImageDraw.Draw(signature_image)
+    # Create an image for the watermark text
+    text_image = Image.new('RGBA', signature_image.size, (255, 255, 255, 0))
+    draw = ImageDraw.Draw(text_image)
     font = ImageFont.load_default()
     text_position = (10, 10)
-    draw.text(text_position, watermark_text, fill="black", font=font)
+    draw.multiline_text(text_position, watermark_text, fill="black", font=font)
+
+    # Combine the signature and the text
+    combined_image = Image.alpha_composite(signature_image, text_image)
 
     # Display the final image
-    st.image(signature_image, caption="Beneficiary Signature with Watermark")
+    st.image(combined_image, caption="Beneficiary Signature with Watermark")
 
     # Optionally, allow downloading the image
     buf = io.BytesIO()
-    signature_image.save(buf, format="PNG")
+    combined_image.save(buf, format="PNG")
     byte_im = buf.getvalue()
 
     st.download_button(
