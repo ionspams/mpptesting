@@ -142,21 +142,29 @@ elif st.session_state.step == 3:
         # Get current date and time without seconds
         current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M")
 
-        # Create watermark text
+        # Create watermark text with all required information
         watermark_text = (
             f"Date: {current_datetime}\n"
+            f"Ticket ID: {order['ticket_id']}\n"
             f"Contact Person: {order['contact_person']}\n"
+            f"Phone Number: {order['phone_number']}\n"
             f"Warehouse: {order['warehouse_name']}\n"
+            f"Family Size: {order['family_size']}\n"
             f"Vouchers: {', '.join(order['vouchers'])}\n"
             f"Documents: {', '.join(st.session_state.documents_input)}"
         )
 
+        # Adjust canvas dimensions
+        canvas_width = 600  # Increased width for better readability
+        canvas_height = 500  # Increased height to accommodate more text
+
         # Create an image for the watermark text
-        canvas_width = 400
-        canvas_height = 250  # Increase height to accommodate text and signature
         watermark_image = Image.new('RGBA', (canvas_width, canvas_height), (255, 255, 255, 255))
         draw = ImageDraw.Draw(watermark_image)
-        font = ImageFont.load_default()
+
+        # Use a larger font size for better readability
+        font_size = 16
+        font = ImageFont.truetype("arial.ttf", font_size)  # Ensure arial.ttf is available
         text_position = (10, 10)
         draw.multiline_text(text_position, watermark_text, fill="black", font=font)
 
