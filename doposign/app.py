@@ -77,10 +77,9 @@ if st.session_state.step == 1:
     if st.button("Proceed"):
         st.session_state.selected_order = orders_df[orders_df['ticket_id'] == selected_ticket].iloc[0]
         st.session_state.step = 2
-        st.experimental_rerun()
 
 # Step 2: Upload Documents
-elif st.session_state.step == 2:
+if st.session_state.step == 2:
     st.header("Step 2: Upload Documents")
 
     order = st.session_state.selected_order
@@ -98,22 +97,15 @@ elif st.session_state.step == 2:
 
     if uploaded_files and len(uploaded_files) == order['documents_required']:
         if st.button("Validate Documents"):
-            # For the prototype, validation is automatic
             st.success("Documents validated successfully!")
             st.session_state.documents_uploaded = True
             st.session_state.step = 3
-            st.experimental_rerun()
-    else:
-        st.warning(f"Please upload exactly {order['documents_required']} documents.")
 
 # Step 3: Capture Signature
-elif st.session_state.step == 3:
+if st.session_state.step == 3:
     st.header("Step 3: Capture Signature")
 
     st.write("Please sign below:")
-
-    # Debugging: Check the type of st_canvas
-    st.write(f"Type of st_canvas: {type(st_canvas)}")  # Should output <class 'function'>
 
     # Create a canvas component
     canvas_result = st_canvas(
@@ -131,12 +123,11 @@ elif st.session_state.step == 3:
         if canvas_result.image_data is not None:
             st.session_state.signature = canvas_result.image_data
             st.session_state.step = 4
-            st.experimental_rerun()
         else:
             st.warning("Please provide a signature.")
 
 # Step 4: Generate Receipt with Watermark
-elif st.session_state.step == 4:
+if st.session_state.step == 4:
     st.header("Receipt")
 
     order = st.session_state.selected_order
@@ -184,4 +175,3 @@ elif st.session_state.step == 4:
     st.success("Process completed successfully!")
     if st.button("Start Over"):
         st.session_state.step = 1
-        st.experimental_rerun()
