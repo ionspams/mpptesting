@@ -91,7 +91,7 @@ if st.session_state.step == 1:
         st.experimental_rerun()
 
 # Step 2: Input Beneficiary Information
-if st.session_state.step == 2:
+elif st.session_state.step == 2:
     st.header("Step 2: Input Beneficiary Information")
 
     order = st.session_state.selected_order
@@ -99,103 +99,116 @@ if st.session_state.step == 2:
         st.error("No order found. Please go back to the previous step.")
         st.session_state.step = 1
         st.experimental_rerun()
-
-    st.write(f"**Contact Person:** {order['contact_person']}")
-    st.write(f"**Phone Number:** {order['phone_number']}")
-    st.write(f"**Warehouse Name:** {order['warehouse_name']}")
-    st.write(f"**Vouchers:** {', '.join(order['vouchers'])}")
-    st.write(f"**Family Size:** {order['family_size']} (Number of passport numbers required)")
-
-    passport_numbers = st.text_area(
-        f"Enter passport serial and number for each person (one per line). Number of entries required: {order['family_size']}",
-        key="passport_numbers"
-    )
-
-    # Process the input
-    passports_entered = [line.strip() for line in passport_numbers.strip().split('\n') if line.strip()]
-
-    if len(passports_entered) == order['family_size']:
-        if st.button("Proceed to Signature"):
-            st.session_state.documents_input = passports_entered
-            st.session_state.step = 3
-            st.experimental_rerun()
     else:
-        st.warning(f"Please enter exactly {order['family_size']} passport numbers.")
+        st.write(f"**Contact Person:** {order['contact_person']}")
+        st.write(f"**Phone Number:** {order['phone_number']}")
+        st.write(f"**Warehouse Name:** {order['warehouse_name']}")
+        st.write(f"**Vouchers:** {', '.join(order['vouchers'])}")
+        st.write(f"**Family Size:** {order['family_size']} (Number of passport numbers required)")
+
+        passport_numbers = st.text_area(
+            f"Enter passport serial and number for each person (one per line). Number of entries required: {order['family_size']}",
+            key="passport_numbers"
+        )
+
+        # Process the input
+        passports_entered = [line.strip() for line in passport_numbers.strip().split('\n') if line.strip()]
+
+        if len(passports_entered) == order['family_size']:
+            if st.button("Proceed to Signature"):
+                st.session_state.documents_input = passports_entered
+                st.session_state.step = 3
+                st.experimental_rerun()
+        else:
+            st.warning(f"Please enter exactly {order['family_size']} passport numbers.")
 
 # Step 3: Capture Signature
-if st.session_state.step == 3:
+elif st.session_state.step == 3:
     st.header("Step 3: Capture Signature")
 
     st.write("Please sign below:")
 
     order = st.session_state.selected_order
 
-    # Get current date and time without seconds
-    current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M")
+    if order is None:
+        st.error("No order found. Please go back to the previous step.")
+        st.session_state.step = 1
+        st.experimental_rerun()
+    else:
+        # Get current date and time without seconds
+        current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M")
 
-    # Create watermark text
-    watermark_text = (
-        f"Date: {current_datetime}\n"
-        f"Contact Person: {order['contact_person']}\n"
-        f"Warehouse: {order['warehouse_name']}\n"
-        f"Vouchers: {', '.join(order['vouchers'])}\n"
-        f"Documents: {', '.join(st.session_state.documents_input)}"
-    )
+        # Create watermark text
+        watermark_text = (
+            f"Date: {current_datetime}\n"
+            f"Contact Person: {order['contact_person']}\n"
+            f"Warehouse: {order['warehouse_name']}\n"
+            f"Vouchers: {', '.join(order['vouchers'])}\n"
+            f"Documents: {', '.join(st.session_state.documents_input)}"
+        )
 
-    # Create an image for the watermark text
-    canvas_width = 400
-    canvas_height = 250  # Increase height to accommodate text and signature
-    watermark_image = Image.new('RGBA', (canvas_width, canvas_height), (255, 255, 255, 255))
-    draw = ImageDraw.Draw(watermark_image)
-    font = ImageFont.load_default()
-    text_position = (10, 10)
-    draw.multiline_text(text_position, watermark_text, fill="black", font=font)
+        # Create an image for the watermark text
+        canvas_width = 400
+        canvas_height = 250  # Increase height to accommodate text and signature
+        watermark_image = Image.new('RGBA', (canvas_width, canvas_height), (255, 255, 255, 255))
+        draw = ImageDraw.Draw(watermark_image)
+        font = ImageFont.load_default()
+        text_position = (10, 10)
+        draw.multiline_text(text_position, watermark_text, fill="black", font=font)
 
-    # Create a canvas component with the watermark image as background
-    canvas_result = st_canvas(
-        fill_color="rgba(255, 165, 0, 3)",  # Transparent fill
-        stroke_width=2,
-        stroke_color="#000000",
-        background_image=watermark_image,
-        update_streamlit=True,
-        height=canvas_height,
-        width=canvas_width,
-        drawing_mode="freedraw",
-        key="canvas",
-    )
+        # Create a canvas component with the watermark image as background
+        canvas_result = st_canvas(
+            fill_color="rgba(255, 165, 0, 3)",  # Transparent fill
+            stroke_width=2,
+            stroke_color="#000000",
+            background_image=watermark_image,
+            update_streamlit=True,
+            height=canvas_height,
+            width=canvas_width,
+            drawing_mode="freedraw",
+            key="canvas",
+        )
 
-    if st.button("Submit Signature"):
-        if canvas_result.image_data is not None:
-            st.session_state.signature = canvas_result.image_data
-            st.session_state.step = 4
-            st.experimental_rerun()
-        else:
-            st.warning("Please provide a signature.")
+        if st.button("Submit Signature"):
+            if canvas_result.image_data is not None:
+                st.session_state.signature = canvas_result.image_data
+                st.session_state.step = 4
+                st.experimental_rerun()
+            else:
+                st.warning("Please provide a signature.")
 
 # Step 4: Display Receipt
-if st.session_state.step == 4:
+elif st.session_state.step == 4:
     st.header("Receipt")
 
-    # Convert the image data to a PIL Image
-    signature_array = st.session_state.signature
-    signed_image = Image.fromarray((signature_array).astype('uint8'), mode="RGBA")
+    if 'signature' in st.session_state:
+        # Convert the image data to a PIL Image
+        signature_array = st.session_state.signature
+        signed_image = Image.fromarray((signature_array).astype('uint8'), mode="RGBA")
 
-    # Display the final image
-    st.image(signed_image, caption="Beneficiary Signature with Receipt Information")
+        # Display the final image
+        st.image(signed_image, caption="Beneficiary Signature with Receipt Information")
 
-    # Optionally, allow downloading the image
-    buf = io.BytesIO()
-    signed_image.save(buf, format="PNG")
-    byte_im = buf.getvalue()
+        # Optionally, allow downloading the image
+        buf = io.BytesIO()
+        signed_image.save(buf, format="PNG")
+        byte_im = buf.getvalue()
 
-    st.download_button(
-        label="Download Receipt",
-        data=byte_im,
-        file_name="receipt.png",
-        mime="image/png",
-    )
+        st.download_button(
+            label="Download Receipt",
+            data=byte_im,
+            file_name="receipt.png",
+            mime="image/png",
+        )
 
-    st.success("Process completed successfully!")
+        st.success("Process completed successfully!")
+    else:
+        st.error("No signature found. Please go back and provide a signature.")
+        st.session_state.step = 3
+        st.experimental_rerun()
+
     if st.button("Start Over"):
         st.session_state.step = 1
+        st.session_state.selected_order = None
+        st.session_state.documents_input = []
         st.experimental_rerun()
