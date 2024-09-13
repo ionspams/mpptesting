@@ -58,6 +58,10 @@ for i in range(3, 11):
 # Create a DataFrame for easy access
 orders_df = pd.DataFrame(orders_data)
 
+# Debugging: Track the session state and steps
+st.write(f"Session state: {st.session_state}")
+st.write(f"Current step: {st.session_state.get('step', 1)}")
+
 # Session state initialization
 if 'step' not in st.session_state:
     st.session_state.step = 1
@@ -77,12 +81,18 @@ if st.session_state.step == 1:
     if st.button("Proceed"):
         st.session_state.selected_order = orders_df[orders_df['ticket_id'] == selected_ticket].iloc[0]
         st.session_state.step = 2
+        st.experimental_rerun()  # Rerun to update the state and move to the next step
 
 # Step 2: Input Document Information
 if st.session_state.step == 2:
     st.header("Step 2: Input Document Information")
 
     order = st.session_state.selected_order
+    if order is None:
+        st.error("No order found. Please go back to the previous step.")
+        st.session_state.step = 1
+        st.experimental_rerun()
+
     st.write(f"**Contact Person:** {order['contact_person']}")
     st.write(f"**Phone Number:** {order['phone_number']}")
     st.write(f"**Warehouse Name:** {order['warehouse_name']}")
@@ -99,6 +109,7 @@ if st.session_state.step == 2:
         if st.button("Validate Documents"):
             st.success("Documents validated successfully!")
             st.session_state.step = 3
+            st.experimental_rerun()
     else:
         st.warning("Please fill out all passport information.")
 
@@ -124,6 +135,7 @@ if st.session_state.step == 3:
         if canvas_result.image_data is not None:
             st.session_state.signature = canvas_result.image_data
             st.session_state.step = 4
+            st.experimental_rerun()
         else:
             st.warning("Please provide a signature.")
 
@@ -132,6 +144,11 @@ if st.session_state.step == 4:
     st.header("Receipt")
 
     order = st.session_state.selected_order
+
+    if order is None:
+        st.error("No order found. Please go back to the previous step.")
+        st.session_state.step = 1
+        st.experimental_rerun()
 
     # Get current date and time without seconds
     current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M")
@@ -177,3 +194,4 @@ if st.session_state.step == 4:
     st.success("Process completed successfully!")
     if st.button("Start Over"):
         st.session_state.step = 1
+        st.experimental_rerun()
