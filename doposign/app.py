@@ -78,6 +78,10 @@ if 'documents_input' not in st.session_state:
     st.session_state.documents_input = []
 if 'signature' not in st.session_state:
     st.session_state.signature = None
+if 'passport_warning' not in st.session_state:
+    st.session_state.passport_warning = ''
+if 'signature_warning' not in st.session_state:
+    st.session_state.signature_warning = ''
 
 # Define callback functions
 def proceed_to_step2():
@@ -115,7 +119,7 @@ if st.session_state.step == 1:
     st.header("Step 1: Select Order")
 
     ticket_ids = orders_df['ticket_id'].tolist()
-    st.session_state.selected_ticket = st.selectbox("Select a Ticket ID", ticket_ids, key='selected_ticket')
+    st.selectbox("Select a Ticket ID", ticket_ids, key='selected_ticket')
 
     st.button("Proceed", on_click=proceed_to_step2)
 
@@ -130,14 +134,14 @@ elif st.session_state.step == 2:
     st.write(f"**Vouchers:** {', '.join(order['vouchers'])}")
     st.write(f"**Family Size:** {order['family_size']} (Number of passport numbers required)")
 
-    st.session_state.passport_numbers = st.text_area(
+    st.text_area(
         f"Enter passport serial and number for each person (one per line). Number of entries required: {order['family_size']}",
         key="passport_numbers"
     )
 
-    if 'passport_warning' in st.session_state:
+    if st.session_state.passport_warning:
         st.warning(st.session_state.passport_warning)
-        del st.session_state.passport_warning
+        st.session_state.passport_warning = ''
 
     st.button("Proceed to Signature", on_click=proceed_to_step3)
 
@@ -193,9 +197,9 @@ elif st.session_state.step == 3:
 
     st.session_state.canvas_result = canvas_result
 
-    if 'signature_warning' in st.session_state:
+    if st.session_state.signature_warning:
         st.warning(st.session_state.signature_warning)
-        del st.session_state.signature_warning
+        st.session_state.signature_warning = ''
 
     st.button("Submit Signature", on_click=submit_signature)
 
