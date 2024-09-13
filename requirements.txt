@@ -1,4 +1,4 @@
-pandas==1.5.3      # Include if your code uses pandas
+pandas==2.0.3     # Include if your code uses pandas
 numpy==1.24.2      # Include if your code uses numpy
 matplotlib==3.7.1  # Include if your code uses matplotlib
 scikit-learn==1.2.1  # Include if your code uses scikit-learn
@@ -19,4 +19,5 @@ google-auth-oauthlib
 google-auth-httplib2
 google-api-python-client
 reportlab
-streamlit-drawable-canvas
+Pillow==9.5.0
+streamlit-drawable-canvas==0.9.2
