@@ -163,8 +163,8 @@ elif st.session_state.step == 3:
         f"Contact Person: {order['contact_person']}\n"
         f"Phone Number: {order['phone_number']}\n"
         f"Warehouse: {order['warehouse_name']}\n"
-        f"Family Size: {order['family_size']}\n"
-        f"Vouchers: {', '.join(order['vouchers'])}\n"
+        f"Family Composition: {order['family_size']} members\n"
+        f"Vouchers Provided: {', '.join(order['vouchers'])}\n"
         f"Documents: {', '.join(st.session_state.documents_input)}"
     )
 
@@ -173,7 +173,7 @@ elif st.session_state.step == 3:
     canvas_height = 500  # Increased height to accommodate more text
 
     # Create an image for the watermark text
-    watermark_image = Image.new('RGBA', (canvas_width, canvas_height), (255, 255, 255, 255))
+    watermark_image = Image.new('RGB', (canvas_width, canvas_height), color='white')
     draw = ImageDraw.Draw(watermark_image)
 
     # Use default font to avoid errors
@@ -182,13 +182,16 @@ elif st.session_state.step == 3:
     text_position = (10, 10)
     draw.multiline_text(text_position, watermark_text, fill="black", font=font)
 
+    # Convert the image to RGBA
+    watermark_image = watermark_image.convert("RGBA")
+
     # Create a canvas component with the watermark image as background
     canvas_result = st_canvas(
-        fill_color="rgba(255, 165, 0, 3)",  # Transparent fill
+        fill_color=None,  # No fill color
         stroke_width=2,
         stroke_color="#000000",
         background_image=watermark_image,
-        update_streamlit=True,
+        background_color=None,
         height=canvas_height,
         width=canvas_width,
         drawing_mode="freedraw",
