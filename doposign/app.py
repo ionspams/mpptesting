@@ -1,95 +1,178 @@
 import streamlit as st
-import streamlit_drawable_canvas as st_canvas
 from datetime import datetime
-import random
+from PIL import Image, ImageDraw, ImageFont
+import pandas as pd
+import io
 
-# Set up Dopamoha color theme
-st.set_page_config(page_title="Pomoha System", page_icon=":package:", layout="wide")
+# Set page configuration
+st.set_page_config(page_title="Pomoha Warehouse Distribution", page_icon="📦", layout="centered")
 
-# Mock data for 10 warehouse orders
-orders = [
-    {"ticket_id": f"TCK-{random.randint(1000, 9999)}", 
-     "contact_person": f"Person {i}", 
-     "phone_number": f"+12345678{i}", 
-     "products": ["Rice", "Sugar", "Oil", "Pasta"], 
-     "warehouse": "Warehouse A"} 
-    for i in range(10)
+# Apply custom CSS for colors (blue and yellow)
+st.markdown("""
+    <style>
+    .reportview-container {
+        background-color: #f0f2f6;
+    }
+    .sidebar .sidebar-content {
+        background-color: #f0f2f6;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+# Hard-coded orders data
+orders_data = [
+    {
+        'ticket_id': 'TICKET001',
+        'phone_number': '+1234567890',
+        'contact_person': 'John Doe',
+        'warehouse_name': 'Warehouse A',
+        'products': ['Product 1', 'Product 2'],
+        'documents_required': 2
+    },
+    # Add 9 more orders
+    {
+        'ticket_id': 'TICKET002',
+        'phone_number': '+0987654321',
+        'contact_person': 'Jane Smith',
+        'warehouse_name': 'Warehouse B',
+        'products': ['Product 3', 'Product 4'],
+        'documents_required': 1
+    },
+    # ... (add more orders as needed)
 ]
 
-# Session state to store selected order and passport inputs
+# Simulate 10 orders
+for i in range(3, 11):
+    orders_data.append({
+        'ticket_id': f'TICKET00{i}',
+        'phone_number': f'+10000000{i}',
+        'contact_person': f'Contact Person {i}',
+        'warehouse_name': f'Warehouse {chr(64+i)}',
+        'products': [f'Product {i}', f'Product {i+1}'],
+        'documents_required': i % 3 + 1
+    })
+
+# Create a DataFrame for easy access
+orders_df = pd.DataFrame(orders_data)
+
+# Session state initialization
+if 'step' not in st.session_state:
+    st.session_state.step = 1
 if 'selected_order' not in st.session_state:
     st.session_state.selected_order = None
-if 'passports' not in st.session_state:
-    st.session_state.passports = [""] * 5
+if 'documents_uploaded' not in st.session_state:
+    st.session_state.documents_uploaded = False
 
-st.title("Pomoha Warehouse Distribution Prototype")
-st.markdown("## Order and Passport Validation")
+# Step 1: Select Order
+if st.session_state.step == 1:
+    st.title("📦 Pomoha Warehouse Distribution System")
+    st.header("Step 1: Select Order")
 
-# Step 1: Select an Order
-order_names = [f"{order['ticket_id']} - {order['contact_person']}" for order in orders]
-selected_order = st.selectbox("Select an Order", order_names)
+    ticket_ids = orders_df['ticket_id'].tolist()
+    selected_ticket = st.selectbox("Select a Ticket ID", ticket_ids)
 
-if selected_order:
-    # Fetch the order based on selection
-    order_index = order_names.index(selected_order)
-    st.session_state.selected_order = orders[order_index]
-    st.write("### Order Details")
-    st.write(f"Ticket ID: {st.session_state.selected_order['ticket_id']}")
-    st.write(f"Contact Person: {st.session_state.selected_order['contact_person']}")
-    st.write(f"Phone Number: {st.session_state.selected_order['phone_number']}")
-    st.write(f"Products: {', '.join(st.session_state.selected_order['products'])}")
-    st.write(f"Warehouse: {st.session_state.selected_order['warehouse']}")
+    if st.button("Proceed"):
+        st.session_state.selected_order = orders_df[orders_df['ticket_id'] == selected_ticket].iloc[0]
+        st.session_state.step = 2
+        st.experimental_rerun()
 
-# Step 2: Enter Passport Numbers (up to 5)
-st.markdown("## Enter Passport Numbers")
-passports = st.session_state.passports
-for i in range(5):
-    passports[i] = st.text_input(f"Passport {i+1}", passports[i])
+# Step 2: Upload Documents
+elif st.session_state.step == 2:
+    st.header("Step 2: Upload Documents")
 
-# Step 3: Validation (mock validation)
-st.markdown("### Validation Step")
-validate_button = st.button("Validate Passports")
-if validate_button:
-    st.success("Passports validated successfully!")
+    order = st.session_state.selected_order
+    st.write(f"**Contact Person:** {order['contact_person']}")
+    st.write(f"**Phone Number:** {order['phone_number']}")
+    st.write(f"**Warehouse Name:** {order['warehouse_name']}")
+    st.write(f"**Products:** {', '.join(order['products'])}")
+    st.write(f"**Documents Required:** {order['documents_required']}")
 
-# Step 4: Signature Canvas with Watermark
-st.markdown("## Signature")
-canvas_width = 600
-canvas_height = 400
+    uploaded_files = st.file_uploader(
+        f"Upload {order['documents_required']} Passport Documents",
+        accept_multiple_files=True,
+        type=['png', 'jpg', 'jpeg', 'pdf']
+    )
 
-# Draw canvas
-signature_canvas = st_canvas(
-    fill_color="rgba(255, 165, 0, 0.3)",  # Fill color with transparency
-    stroke_width=2,
-    stroke_color="#000000",
-    background_color="#FFFFFF",
-    height=canvas_height,
-    width=canvas_width,
-    drawing_mode="freedraw",
-    key="canvas",
-)
-
-# Display watermark information on the canvas
-if st.session_state.selected_order:
-    order_details = st.session_state.selected_order
-    current_time = datetime.now().strftime("%Y-%m-%d %H:%M")
-    watermark = f"""
-    Date: {current_time}\n
-    Contact Person: {order_details['contact_person']}\n
-    Warehouse: {order_details['warehouse']}\n
-    Products: {', '.join(order_details['products'])}
-    """
-    st.write(f"### Watermark Details:\n{watermark}")
-
-    # Simulate adding the watermark to the canvas (for demo purposes)
-    st.markdown(f"Watermark: **{watermark}**")
-
-# Step 5: Save signature or take action on the canvas data
-if st.button("Submit Signature"):
-    if signature_canvas.image_data is not None:
-        st.success("Signature captured and saved!")
+    if uploaded_files and len(uploaded_files) == order['documents_required']:
+        if st.button("Validate Documents"):
+            # For the prototype, validation is automatic
+            st.success("Documents validated successfully!")
+            st.session_state.documents_uploaded = True
+            st.session_state.step = 3
+            st.experimental_rerun()
     else:
-        st.error("Please sign on the canvas before submitting.")
+        st.warning(f"Please upload exactly {order['documents_required']} documents.")
 
-# Step 6: Display a thank you message
-st.markdown("### Thank You for using Pomoha Warehouse Distribution System Prototype!")
+# Step 3: Capture Signature
+elif st.session_state.step == 3:
+    st.header("Step 3: Capture Signature")
+
+    st.write("Please sign below:")
+
+    # Create a canvas for signature
+    from streamlit_drawable_canvas import st_canvas
+
+    canvas_result = st_canvas(
+        fill_color="rgba(255, 165, 0, 0.3)",  # Fixed fill color with some opacity
+        stroke_width=2,
+        stroke_color="#000000",
+        background_color="#FFFFFF",
+        height=150,
+        width=400,
+        drawing_mode="freedraw",
+        key="canvas",
+    )
+
+    if st.button("Submit Signature"):
+        if canvas_result.image_data is not None:
+            st.session_state.signature = canvas_result.image_data
+            st.session_state.step = 4
+            st.experimental_rerun()
+        else:
+            st.warning("Please provide a signature.")
+
+# Step 4: Generate Receipt with Watermark
+elif st.session_state.step == 4:
+    st.header("Receipt")
+
+    order = st.session_state.selected_order
+
+    # Get current date and time without seconds
+    current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M")
+
+    # Create watermark text
+    watermark_text = (
+        f"Date: {current_datetime}\n"
+        f"Contact Person: {order['contact_person']}\n"
+        f"Warehouse: {order['warehouse_name']}\n"
+        f"Products: {', '.join(order['products'])}"
+    )
+
+    # Create an image from the signature data
+    signature_image = Image.fromarray(st.session_state.signature.astype('uint8'), 'RGBA')
+
+    # Add watermark to the signature image
+    draw = ImageDraw.Draw(signature_image)
+    font = ImageFont.load_default()
+    text_position = (10, 10)
+    draw.text(text_position, watermark_text, fill="black", font=font)
+
+    # Display the final image
+    st.image(signature_image, caption="Beneficiary Signature with Watermark")
+
+    # Optionally, allow downloading the image
+    buf = io.BytesIO()
+    signature_image.save(buf, format="PNG")
+    byte_im = buf.getvalue()
+
+    st.download_button(
+        label="Download Receipt",
+        data=byte_im,
+        file_name="receipt.png",
+        mime="image/png",
+    )
+
+    st.success("Process completed successfully!")
+    if st.button("Start Over"):
+        st.session_state.step = 1
+        st.experimental_rerun()
