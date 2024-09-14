@@ -1,5 +1,16 @@
 import streamlit as st
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
 import re
+
+# Google Sheets credentials setup
+scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+creds = ServiceAccountCredentials.from_json_keyfile_name("your_credentials.json", scope)
+client = gspread.authorize(creds)
+
+# Open your Google Sheet by ID
+SHEET_ID = 'your_google_sheet_id'
+sheet = client.open_by_key(SHEET_ID).sheet1
 
 # Function to extract links from the text
 def extract_links(text):
@@ -29,26 +40,32 @@ def segment_text(text, max_chunk_size=750):
     return segments
 
 # Function to create expandable sections for each chunk
-def create_expandable_sections(text, links):
-    summary = summarize_text(text)
-    st.write(f"**{summary[:30]}...**")
-
+def create_expandable_sections(title, link, content):
+    # Display the clickable link title
+    st.markdown(f"### [{title}]({link})", unsafe_allow_html=True)
+    
+    # Create the Read More section for the content
     with st.expander("Read more"):
-        for segment in segment_text(text):
+        for segment in segment_text(content):
             st.write(segment)
         
-        # Display the links
-        for link in links:
-            st.markdown(f"[{link}]({link})", unsafe_allow_html=True)
+        # Display the link again for convenience
+        st.markdown(f"[{link}]({link})", unsafe_allow_html=True)
+
+# Fetch data from the Google Sheet
+def get_sheet_data():
+    rows = sheet.get_all_records()
+    return rows
 
 # Streamlit app
 st.title("My ChatGPT Links")
 
-# Form to input text and links
-with st.form("link_form"):
-    input_text = st.text_area("Enter Title, Text, and Links", height=150)
-    submitted = st.form_submit_button("Add Link")
+# Fetch and display all data
+sheet_data = get_sheet_data()
 
-if submitted and input_text:
-    links = extract_links(input_text)
-    create_expandable_sections(input_text, links)
+# Loop through all the rows in the Google Sheet and display them
+for row in sheet_data:
+    link = row['Link']
+    title = row['Title']
+    content = row['Content']
+    create_expandable_sections(title, link, content)
