@@ -1,21 +1,27 @@
 import streamlit as st
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
-import re
+import json
 
-# Google Sheets credentials setup
+# Load Google API credentials from Streamlit secrets
+creds_dict = st.secrets["google_credentials"]
+creds_json = json.dumps(creds_dict)
+
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-creds = ServiceAccountCredentials.from_json_keyfile_name("your_credentials.json", scope)
+creds = ServiceAccountCredentials.from_json_keyfile_dict(json.loads(creds_json), scope)
+
+# Connect to Google Sheets
 client = gspread.authorize(creds)
 
-# Open your Google Sheet by ID
+# Replace with your actual spreadsheet ID and sheet name
 SHEET_ID = 'your_google_sheet_id'
-sheet = client.open_by_key(SHEET_ID).sheet1
+SHEET_NAME = 'Sheet1'
+sheet = client.open_by_key(SHEET_ID).worksheet(SHEET_NAME)
 
-# Function to extract links from the text
-def extract_links(text):
-    url_regex = r'https?://[^\s]+'
-    return re.findall(url_regex, text)
+# Function to fetch data from Google Sheets
+def get_sheet_data():
+    rows = sheet.get_all_records()
+    return rows
 
 # Function to summarize text (first sentence)
 def summarize_text(text):
@@ -52,15 +58,10 @@ def create_expandable_sections(title, link, content):
         # Display the link again for convenience
         st.markdown(f"[{link}]({link})", unsafe_allow_html=True)
 
-# Fetch data from the Google Sheet
-def get_sheet_data():
-    rows = sheet.get_all_records()
-    return rows
-
 # Streamlit app
 st.title("My ChatGPT Links")
 
-# Fetch and display all data
+# Fetch and display all data from Google Sheets
 sheet_data = get_sheet_data()
 
 # Loop through all the rows in the Google Sheet and display them
