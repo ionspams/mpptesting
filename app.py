@@ -1,68 +1,110 @@
 import streamlit as st
-import gspread
+import re
+import pandas as pd
 from google.oauth2.credentials import Credentials
-from google_auth_oauthlib.flow import InstalledAppFlow
-from google.auth.transport.requests import Request
-import pickle
-import os
+from google_auth_oauthlib.flow import Flow
+from googleapiclient.discovery import build
+import json
 
-# Define the scope for Google Sheets
-SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
+# Constants
+SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
+SPREADSHEET_ID = '1t5cpHnxn-voR-2ODERypf5lyE1oM71YLWgb7ikrgqmI'
 
-# Load credentials from Streamlit secrets or authenticate the user
+# Use Streamlit secrets
+CLIENT_CONFIG = {
+    "web": {
+        "client_id": st.secrets["google_oauth"]["client_id"],
+        "client_secret": st.secrets["google_oauth"]["client_secret"],
+        "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+        "token_uri": "https://oauth2.googleapis.com/token",
+        "redirect_uris": [st.secrets["google_oauth"]["redirect_uri"]],
+    }
+}
+
+# Function to extract URLs from text
+def extract_urls(text):
+    url_pattern = re.compile(r'(https?://\S+)')
+    return url_pattern.findall(text)
+
+# Function to process input text
+def process_text(text):
+    urls = extract_urls(text)
+    title = text[:30] + ('...' if len(text) > 30 else '')
+    content_without_urls = re.sub(r'https?://\S+', '', text)
+    content = content_without_urls.strip()
+    return title, urls, content
+
+# OAuth Functions
 def get_credentials():
-    creds = None
-    
-    # Check if we have saved user credentials
-    if os.path.exists("token.pickle"):
-        with open("token.pickle", "rb") as token:
-            creds = pickle.load(token)
-    
-    # If no valid credentials, initiate OAuth flow
-    if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-        else:
-            flow = InstalledAppFlow.from_client_config({
-                "installed": {
-                    "client_id": st.secrets["google_oauth"]["client_id"],
-                    "client_secret": st.secrets["google_oauth"]["client_secret"],
-                    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-                    "token_uri": "https://oauth2.googleapis.com/token",
-                    "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-                    "redirect_uris": ["http://localhost:8501"]
-                }
-            }, SCOPES)
-            creds = flow.run_local_server(port=8501)
-        
-        # Save credentials for future use
-        with open("token.pickle", "wb") as token:
-            pickle.dump(creds, token)
-    
-    return creds
+    if 'credentials' not in st.session_state:
+        st.session_state.credentials = None
 
-# Get authenticated credentials
-creds = get_credentials()
+    if not st.session_state.credentials or not st.session_state.credentials.valid:
+        flow = Flow.from_client_config(
+            CLIENT_CONFIG,
+            scopes=SCOPES,
+            redirect_uri=st.secrets["google_oauth"]["redirect_uri"]
+        )
+        auth_url, _ = flow.authorization_url(prompt='consent')
+        st.write(f"[Click here to authorize]({auth_url}) to access Google Sheets.")
 
-# Connect to Google Sheets
-client = gspread.authorize(creds)
+        # Get authorization code from the user
+        auth_code = st.text_input("Enter the authorization code:")
 
-# Google Sheet ID and Sheet Name (You already provided these)
-SHEET_ID = '1t5cpHnxn-voR-2ODERypf5lyE1oM71YLWgb7ikrgqmI'
-SHEET_NAME = 'Project1'
+        if auth_code:
+            flow.fetch_token(code=auth_code)
+            st.session_state.credentials = flow.credentials
 
-# Open the Google Sheet by ID and access the specific worksheet by name
-sheet = client.open_by_key(SHEET_ID).worksheet(SHEET_NAME)
+    return st.session_state.credentials
 
-# Fetch data from Google Sheets
-def get_sheet_data():
-    rows = sheet.get_all_records()
-    return rows
+# Main App
+def main():
+    st.title("URL Extractor App")
 
-st.title("My ChatGPT Links")
+    credentials = get_credentials()
 
-# Fetch and display data from Google Sheets
-sheet_data = get_sheet_data()
+    if credentials:
+        try:
+            service = build('sheets', 'v4', credentials=credentials)
+            sheet = service.spreadsheets()
 
-for row in sheet_data:
-    st.write(f"Title: {row['Title']}, Link: {row['Link']}, Content: {row['Content']}")
+            # Input Form
+            with st.form("input_form", clear_on_submit=True):
+                user_input = st.text_area("Enter text containing URLs")
+                submitted = st.form_submit_button("Submit")
+                if submitted and user_input:
+                    title, urls, content = process_text(user_input)
+                    # Append data to Google Sheets
+                    values = [[title, ', '.join(urls), content]]
+                    body = {'values': values}
+                    sheet.values().append(
+                        spreadsheetId=SPREADSHEET_ID,
+                        range="Sheet1!A:C",
+                        valueInputOption="RAW",
+                        insertDataOption="INSERT_ROWS",
+                        body=body
+                    ).execute()
+                    st.success("Data saved successfully!")
+
+            # Display Data
+            st.header("Saved Entries")
+            result = sheet.values().get(
+                spreadsheetId=SPREADSHEET_ID,
+                range="Sheet1!A:C"
+            ).execute()
+            rows = result.get('values', [])
+            df = pd.DataFrame(rows, columns=['Title', 'URLs', 'Content'])
+
+            for index, row in df.iterrows():
+                st.subheader(row['Title'])
+                urls = row['URLs'].split(', ')
+                for url in urls:
+                    st.markdown(f"- [{url}]({url})")
+                with st.expander("Read more"):
+                    st.write(row['Content'])
+
+        except Exception as e:
+            st.error(f'An error occurred: {e}')
+
+if __name__ == "__main__":
+    main()
