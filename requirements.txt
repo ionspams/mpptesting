@@ -6,3 +6,5 @@ google-auth==2.21.0
 google-auth-oauthlib==1.0.0
 requests==2.31.0
 oauthlib==3.2.2
+httplib2==0.22.0
+re==0.0.2
