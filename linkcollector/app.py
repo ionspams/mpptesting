@@ -1,70 +1,63 @@
 import streamlit as st
+import re
 import gspread
 from google.oauth2.credentials import Credentials
-from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
-import pickle
-import os
 
-# Define the scope for Google Sheets
-SCOPES = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
+# Function to extract URLs from text
+def extract_urls(text):
+    url_pattern = re.compile(r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+')
+    return url_pattern.findall(text)
 
-# Load credentials from Streamlit secrets or authenticate the user
-def get_credentials():
-    creds = None
-    
-    # Check if we have saved user credentials
-    if os.path.exists("token.pickle"):
-        with open("token.pickle", "rb") as token:
-            creds = pickle.load(token)
-    
-    # If no valid credentials, initiate OAuth flow
-    if not creds or not creds.valid:
-        if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
-        else:
-            flow = InstalledAppFlow.from_client_config({
-                "installed": {
-                    "client_id": st.secrets["google_oauth"]["client_id"],
-                    "client_secret": st.secrets["google_oauth"]["client_secret"],
-                    "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-                    "token_uri": "https://oauth2.googleapis.com/token",
-                    "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-                    "redirect_uris": ["http://localhost:8501"]
-                }
-            }, SCOPES)
-            creds = flow.run_local_server(port=8501)
-        
-        # Save credentials for future use
-        with open("token.pickle", "wb") as token:
-            pickle.dump(creds, token)
-    
-    return creds
+# Function to get title from text (first 30 characters)
+def get_title(text):
+    return text[:30].strip()
 
-# Get authenticated credentials
-creds = get_credentials()
+# Function to connect to Google Sheets
+def connect_to_sheets():
+    creds = Credentials.from_authorized_user_info(info=st.secrets["gcp_service_account"])
+    if creds and creds.expired and creds.refresh_token:
+        creds.refresh(Request())
+    client = gspread.authorize(creds)
+    sheet = client.open(st.secrets["sheet_name"]).sheet1
+    return sheet
 
-# Connect to Google Sheets
-client = gspread.authorize(creds)
+# Function to save data to Google Sheets
+def save_to_sheets(sheet, title, urls, content):
+    sheet.append_row([title, ', '.join(urls), content])
 
-# Provide Your Google Sheet ID Here
-SHEET_ID = '1t5cpHnxn-voR-2ODERypf5lyE1oM71YLWgb7ikrgqmI'  # Replace this with your actual Google Sheet ID
+# Function to load data from Google Sheets
+def load_from_sheets(sheet):
+    return sheet.get_all_values()[1:]  # Exclude header row
 
-# Provide Your Sheet Name Here
-SHEET_NAME = 'Project1  # Replace with the actual sheet/tab name
+# Streamlit app
+def main():
+    st.title('URL Extractor App')
 
-# Open the Google Sheet by ID and access the specific worksheet by name
-sheet = client.open_by_key(SHEET_ID).worksheet(SHEET_NAME)
+    # Connect to Google Sheets
+    sheet = connect_to_sheets()
 
-# Fetch data from Google Sheets
-def get_sheet_data():
-    rows = sheet.get_all_records()
-    return rows
+    # Input form
+    user_input = st.text_area('Enter your text (including URLs):')
+    if st.button('Submit'):
+        urls = extract_urls(user_input)
+        title = get_title(user_input)
+        content = user_input[30:]  # Rest of the content
 
-st.title("My ChatGPT Links")
+        # Save to Google Sheets
+        save_to_sheets(sheet, title, urls, content)
+        st.success('Data saved successfully!')
 
-# Fetch and display data from Google Sheets
-sheet_data = get_sheet_data()
+    # Display saved entries
+    st.header('Saved Entries')
+    entries = load_from_sheets(sheet)
+    for entry in entries:
+        title, urls, content = entry
+        st.subheader(title)
+        for url in urls.split(', '):
+            st.markdown(f'[{url}]({url})')
+        with st.expander('Read more'):
+            st.write(content)
 
-for row in sheet_data:
-    st.write(f"Title: {row['Title']}, Link: {row['Link']}, Content: {row['Content']}")
+if __name__ == '__main__':
+    main()
