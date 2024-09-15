@@ -47,11 +47,9 @@ creds = get_credentials()
 # Connect to Google Sheets
 client = gspread.authorize(creds)
 
-# Provide Your Google Sheet ID Here
-SHEET_ID = '1t5cpHnxn-voR-2ODERypf5lyE1oM71YLWgb7ikrgqmI'  # Replace this with your actual Google Sheet ID
-
-# Provide Your Sheet Name Here
-SHEET_NAME = 'Project1  # Replace with the actual sheet/tab name
+# Google Sheet ID and Sheet Name (You already provided these)
+SHEET_ID = '1t5cpHnxn-voR-2ODERypf5lyE1oM71YLWgb7ikrgqmI'
+SHEET_NAME = 'Project1'
 
 # Open the Google Sheet by ID and access the specific worksheet by name
 sheet = client.open_by_key(SHEET_ID).worksheet(SHEET_NAME)
